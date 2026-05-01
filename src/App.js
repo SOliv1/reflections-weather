@@ -60,6 +60,37 @@ const getWeatherClass = (weather) => {
   return 'cold';
 }
 
+// Returns time-of-day label + icon based on city's local solar position
+const getTimeOfDay = (weather) => {
+  const now        = Math.floor(Date.now() / 1000);
+  const local      = now + weather.timezone;
+  const sunrise    = weather.sys.sunrise + weather.timezone;
+  const sunset     = weather.sys.sunset  + weather.timezone;
+  const dayLen     = sunset - sunrise;
+  const golden     = 40 * 60; // 40-minute golden-hour window
+  const noonLocal  = sunrise + dayLen / 2;
+
+  if (local < sunrise - golden)                         return { label: 'Night',       icon: '🌙' };
+  if (local < sunrise)                                  return { label: 'Dawn',        icon: '🌄' };
+  if (local < sunrise + golden)                         return { label: 'Morning',     icon: '🌅' };
+  if (local < noonLocal - 60 * 60)                      return { label: 'Morning',     icon: '☀️' };
+  if (local < noonLocal + 60 * 60)                      return { label: 'Noon',        icon: '🌞' };
+  if (local < sunset - golden)                          return { label: 'Afternoon',   icon: '🌤️' };
+  if (local < sunset)                                   return { label: 'Dusk',        icon: '🌇' };
+  if (local < sunset + golden)                          return { label: 'Evening',     icon: '🌆' };
+  return                                                       { label: 'Night',       icon: '🌙' };
+};
+
+function TimeOfDayBadge({ weather }) {
+  const { label, icon } = getTimeOfDay(weather);
+  return (
+    <div className="tod-badge">
+      <span className="tod-icon">{icon}</span>
+      <span className="tod-label">{label}</span>
+    </div>
+  );
+}
+
 // Computes city local time from OWM timezone offset (UTC seconds)
 const getCityTimeData = (tzOffsetSec) => {
   const d = new Date(Date.now() + tzOffsetSec * 1000);
@@ -593,6 +624,7 @@ function App() {
             <HomeClockFace clockTime={clock.time} clockLabel={clock.label} />
             <CityClockFace timezone={weather.timezone} />
           </div>
+          <TimeOfDayBadge weather={weather} />
           <div className="weather-box">
             <img
               className="weather-icon"
