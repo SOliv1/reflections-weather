@@ -45,20 +45,45 @@ const getWeatherClass = (weather) => {
   const sunriseLocal = weather.sys.sunrise + weather.timezone;
   const sunsetLocal = weather.sys.sunset + weather.timezone;
   const goldenWindow = 45 * 60; // 45 minutes in seconds
+  const isNight  = localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow;
+  const isSunrise = !isNight && localUnix < sunriseLocal + goldenWindow;
+  const isSunset  = !isNight && !isSunrise && localUnix > sunsetLocal - goldenWindow;
+
+  // Clouds at night → moon-through-clouds image; at golden hour → sunrise/sunset
+  if (condition === 'Clouds') {
+    if (temp < -1) return 'ice';
+    if (temp <= 5) return 'cold';
+    if (temp >= 40) return 'scorching';
+    if (temp > 30) return 'hot';
+    if (isNight) return 'night';
+    if (isSunrise) return 'sunrise';
+    if (isSunset) return 'sunset';
+    return 'clouds';
+  }
 
   // Extreme temps override time-of-day entirely
   if (temp < -1) return 'ice';
   if (temp >= 40) return 'scorching';
 
-  if (localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow) return 'night';
-  if (localUnix < sunriseLocal + goldenWindow) return 'sunrise';
-  if (localUnix > sunsetLocal - goldenWindow) return 'sunset';
+  if (isNight) return 'night';
+  if (isSunrise) return 'sunrise';
+  if (isSunset) return 'sunset';
 
   // Daytime temperature-based
   if (temp > 30) return 'hot';
   if (temp > 16) return 'warm';
   return 'cold';
 }
+
+// Returns true if it is currently night at the searched city
+const isNightAtCity = (weather) => {
+  if (!weather.sys) return false;
+  const now        = Math.floor(Date.now() / 1000);
+  const localUnix  = now + weather.timezone;
+  const sunrise    = weather.sys.sunrise + weather.timezone;
+  const sunset     = weather.sys.sunset  + weather.timezone;
+  return localUnix < sunrise - 30 * 60 || localUnix > sunset + 30 * 60;
+};
 
 // Returns time-of-day label + icon based on city's local solar position
 const getTimeOfDay = (weather) => {
@@ -474,7 +499,7 @@ function App() {
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
-    <div className={`app${weather.main ? ` ${getWeatherClass(weather)}` : ''}`}>
+    <div className={`app${weather.main ? ` ${getWeatherClass(weather)}` : ''}${weather.main && isNightAtCity(weather) ? ' night-mode' : ''}`}>
       {/* ── App Cover Splash ──
           Replace the placeholder gradient with your cover image by adding to .app-splash in index.css:
             background-image: url('./assets/your-cover-image.jpg');

@@ -79,6 +79,24 @@ body {
   background-image: url('./assets/sunset.jpg');
 }
 
+/* Night mode overlay — darkens rain/mist/thunderstorm/snow at night
+   without replacing their background image */
+.app.night-mode main::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 22, 0.38);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.6s ease;
+}
+
+/* Ensure content sits above the overlay */
+.app.night-mode main>* {
+  position: relative;
+  z-index: 1;
+}
+
 /* Search bar tint per condition */
 .app.cold .search-box .search-bar,
 .app.snow .search-box .search-bar,
