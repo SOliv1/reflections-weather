@@ -1,10 +1,15 @@
 # Getting Started with Create React App
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4241da37-855e-4259-aa7e-54a7aab27eca/deploy-status)](https://app.netlify.com/sites/react-weather-openweather-2/deploys)
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 View on GitHub pages [Here](https://soliv1.github.io/react-weather/)
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/4241da37-855e-4259-aa7e-54a7aab27eca/deploy-status)](https://app.netlify.com/sites/react-weather-openweather-2/deploys)
+### Key thing to remember: GitHub Pages only updates when you run npm run deploy. Pushing to master updates the source code but not the live site;
+npm run deploy is what builds and ships to gh-pages.
+
 
 View the site [here on Netlify](https://react-weather-openweather.netlify.app/)
 
