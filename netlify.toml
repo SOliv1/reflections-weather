@@ -1,5 +1,5 @@
 [build]
-  command   = "npm run build"
+  command   = "echo REACT_APP_API_KEY=$WEATHER_API_KEY > .env && npm run build"
   publish   = "build"
 
 # React SPA: serve index.html for all routes
