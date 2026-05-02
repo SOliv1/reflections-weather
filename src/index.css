@@ -129,7 +129,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 32px;
   padding-top: 8px;
   padding-bottom: 4px;
   animation: rfl-fadein 1.4s ease both;
@@ -151,34 +151,31 @@ main {
 .reflections-orb {
   width: 52px;
   height: 52px;
+  object-fit: cover;
   border-radius: 50%;
-  background: radial-gradient(circle at 38% 36%,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(220, 235, 255, 0.82) 38%,
-      rgba(180, 210, 255, 0.38) 65%,
-      transparent 100%);
   box-shadow:
-    0 0 22px 8px rgba(200, 220, 255, 0.45),
-    0 0 60px 18px rgba(180, 210, 255, 0.2),
-    0 0 2px 1px rgba(255, 255, 255, 0.9);
+    0 0 25px 9px rgba(30, 60, 120, 0.35),
+    0 0 68px 20px rgba(30, 60, 120, 0.15);
+  filter: brightness(1.08) contrast(1.05);
   animation: orb-shimmer 5s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes orb-shimmer {
 
   0%,
   100% {
-    box-shadow: 0 0 22px 8px rgba(200, 220, 255, 0.45), 0 0 60px 18px rgba(180, 210, 255, 0.20), 0 0 2px 1px rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 25px 9px rgba(30, 60, 120, 0.35), 0 0 68px 20px rgba(30, 60, 120, 0.15);
   }
 
   50% {
-    box-shadow: 0 0 30px 12px rgba(210, 225, 255, 0.65), 0 0 80px 28px rgba(180, 210, 255, 0.32), 0 0 4px 2px rgba(255, 255, 255, 1.0);
+    box-shadow: 0 0 30px 11px rgba(30, 60, 120, 0.38), 0 0 78px 24px rgba(30, 60, 120, 0.18);
   }
 }
 
 /* Pulse while weather is loading */
 .reflections-orb.orb-loading {
-  animation: orb-pulse 0.9s ease-in-out infinite;
+  animation: orb-shimmer 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
 }
 
 @keyframes orb-pulse {
@@ -212,6 +209,7 @@ main {
   .reflections-orb {
     width: 42px;
     height: 42px;
+    object-fit: cover;
   }
 
   .reflections-title {
@@ -683,7 +681,7 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 14px auto 0;
+  margin: 16px auto 0;
   padding: 10px 22px;
   background: rgba(255, 255, 255, 0.15);
   -webkit-backdrop-filter: blur(10px);
@@ -1043,16 +1041,18 @@ main {
 
 /* Orb image */
 .splash-orb {
-  width: 120px;
-  height: 120px;
+  width: clamp(140px, 40vw, 300px);
+  height: clamp(140px, 40vw, 300px);
   object-fit: cover;
   border-radius: 50%;
+  /* Atmospheric midnight-blue halo — 35-40% opacity, wide soft spread, no neon */
   box-shadow:
-    0 0 40px 14px rgba(80, 100, 200, 0.45),
-    0 0 90px 30px rgba(60, 80, 180, 0.22);
-  margin-bottom: 28px;
+    0 0 50px 16px rgba(18, 36, 120, 0.38),
+    0 0 130px 55px rgba(12, 28, 90, 0.18);
+  margin-bottom: 16px;
   animation: orbArrive 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   filter: brightness(1.08) contrast(1.05);
+  will-change: transform, opacity;
 }
 
 @keyframes orbArrive {
@@ -1076,13 +1076,13 @@ main {
 
   0%,
   100% {
-    box-shadow: 0 0 40px 14px rgba(80, 100, 200, 0.45), 0 0 90px 30px rgba(60, 80, 180, 0.22);
+    box-shadow: 0 0 50px 16px rgba(18, 36, 120, 0.38), 0 0 130px 55px rgba(12, 28, 90, 0.18);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 55px 20px rgba(90, 115, 220, 0.65), 0 0 110px 40px rgba(70, 90, 200, 0.35);
-    transform: scale(1.06);
+    box-shadow: 0 0 65px 24px rgba(22, 44, 140, 0.42), 0 0 155px 70px rgba(14, 32, 100, 0.22);
+    transform: scale(1.05);
   }
 }
 
@@ -1144,10 +1144,7 @@ main {
 }
 
 @media (max-width: 600px) {
-  .splash-orb {
-    width: 90px;
-    height: 90px;
-  }
+  /* splash-orb sizing handled by clamp(140px, 40vw, 300px) — no override needed */
 
   .splash-title {
     font-size: 20px;

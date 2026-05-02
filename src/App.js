@@ -215,6 +215,15 @@ function App() {
   const searchWrapRef = useRef(null);
   const debounceRef = useRef(null);
 
+  // Splash parallax refs — direct DOM manipulation keeps transforms off the render cycle
+  const splashRef = useRef(null);
+  const splashOrbRef = useRef(null);
+  const orbOffsetYRef = useRef(0);
+  const touchStartYRef = useRef(null);
+
+  // Header orb parallax ref
+  const headerOrbRef = useRef(null);
+
   // Saved cities (persisted in localStorage)
   const [savedCities, setSavedCities] = useState(() => {
     try { return JSON.parse(localStorage.getItem('savedCities') || '[]'); }
@@ -298,6 +307,69 @@ function App() {
     const t = setTimeout(() => setSplashHidden(true), 7000);
     return () => clearTimeout(t);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Splash parallax — orb drifts upward at 0.35× scroll/swipe speed, fades ~8% at max offset.
+  // Direct DOM writes keep transforms off the React render cycle for smooth 60fps compositing.
+  useEffect(() => {
+    const el = splashRef.current;
+    if (!el) return;
+    const SPEED = 0.35;
+    const MAX_OFFSET = 70; // px upward travel cap
+    const FADE_RANGE = 0.08; // opacity reduction at max offset
+
+    const applyTransform = () => {
+      if (!splashOrbRef.current) return;
+      const y = orbOffsetYRef.current;
+      const opacity = 1 - (Math.abs(y) / MAX_OFFSET) * FADE_RANGE;
+      splashOrbRef.current.style.transform = `translateY(${y}px)`;
+      splashOrbRef.current.style.opacity = opacity;
+    };
+
+    const onWheel = (e) => {
+      // deltaY > 0 = scroll down → orb drifts up (negative y) but slower
+      orbOffsetYRef.current = Math.max(-MAX_OFFSET, Math.min(0, orbOffsetYRef.current - e.deltaY * SPEED));
+      applyTransform();
+    };
+
+    const onTouchStart = (e) => {
+      touchStartYRef.current = e.touches[0].clientY;
+    };
+
+    const onTouchMove = (e) => {
+      if (touchStartYRef.current === null) return;
+      // dy > 0 when finger moves up (scroll-down gesture)
+      const dy = touchStartYRef.current - e.touches[0].clientY;
+      touchStartYRef.current = e.touches[0].clientY;
+      orbOffsetYRef.current = Math.max(-MAX_OFFSET, Math.min(0, orbOffsetYRef.current - dy * SPEED));
+      applyTransform();
+    };
+
+    const onTouchEnd = () => { touchStartYRef.current = null; };
+
+    el.addEventListener('wheel', onWheel, { passive: true });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Header orb parallax — drifts down at 0.4× scroll speed, fades gently
+  useEffect(() => {
+    const onScroll = () => {
+      if (!headerOrbRef.current) return;
+      const y = window.scrollY;
+      headerOrbRef.current.style.transform = `translateY(${y * 0.4}px)`;
+      headerOrbRef.current.style.opacity = Math.max(0, 1 - y * 0.001);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Persist saved cities to localStorage whenever they change
   useEffect(() => {
@@ -504,9 +576,10 @@ function App() {
           Replace the placeholder gradient with your cover image by adding to .app-splash in index.css:
             background-image: url('./assets/your-cover-image.jpg');
           Place the image in src/assets/ and update the filename above. */}
-      <div className={`app-splash${splashHidden ? ' hidden' : ''}`} aria-hidden={splashHidden}>
+      <div ref={splashRef} className={`app-splash${splashHidden ? ' hidden' : ''}`} aria-hidden={splashHidden}>
         <div className="splash-content">
           <img
+            ref={splashOrbRef}
             className={`splash-orb${locating ? ' orb-loading' : ''}`}
             src={require('./assets/midnightGlowOrb.jpg')}
             alt=""
@@ -527,7 +600,13 @@ function App() {
       <main>
         {/* ── Reflections header: orb + wordmark ── */}
         <header className="reflections-header">
-          <div className={`reflections-orb${locating ? ' orb-loading' : ''}`} aria-hidden="true" />
+          <img
+            ref={headerOrbRef}
+            className={`reflections-orb${locating ? ' orb-loading' : ''}`}
+            src={require('./assets/midnightGlowOrb.jpg')}
+            alt=""
+            aria-hidden="true"
+          />
           <h1 className="reflections-title">Reflections: Weather</h1>
         </header>
         <div className="search-box" ref={searchWrapRef}>
