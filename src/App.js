@@ -359,10 +359,21 @@ function App() {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Header orb parallax — drifts down at 0.4× scroll speed, fades gently
+  // Header orb parallax — drifts down at 0.4× scroll speed, fades gently.
+  // Transition duration lengthens in dark/storm conditions for a cinematic feel.
   useEffect(() => {
+    const DARK_CLASSES = ['night-mode', 'night', 'thunderstorm', 'extreme', 'heavy-rain', 'ice'];
+
+    const applyTransition = (el) => {
+      const appEl = el.closest('.app');
+      const isDark = appEl && DARK_CLASSES.some(c => appEl.classList.contains(c));
+      const duration = isDark ? '1.2s' : '0.8s';
+      el.style.transition = `box-shadow ${duration} ease, filter ${duration} ease`;
+    };
+
     const onScroll = () => {
       if (!headerOrbRef.current) return;
+      applyTransition(headerOrbRef.current);
       const y = window.scrollY;
       headerOrbRef.current.style.transform = `translateY(${y * 0.4}px)`;
       headerOrbRef.current.style.opacity = Math.max(0, 1 - y * 0.001);
@@ -375,6 +386,38 @@ function App() {
   useEffect(() => {
     localStorage.setItem('savedCities', JSON.stringify(savedCities));
   }, [savedCities]);
+
+  // Time-of-day orb mode — uses API sunrise/sunset for city-local precision.
+  // Sets orb--dark (night) or orb--light (day) directly on the element.
+  // Also governs transition duration: 1.2s at night (cinematic), 0.8s in daylight.
+  useEffect(() => {
+    if (!headerOrbRef.current) return;
+    const orb = headerOrbRef.current;
+
+    requestAnimationFrame(() => {
+      if (!orb) return;
+
+      let isDark;
+      if (weather.sys && weather.timezone !== undefined) {
+        // Precise: compare current UTC unix against city-local sunrise/sunset
+        const now = Math.floor(Date.now() / 1000);
+        const localUnix    = now                    + weather.timezone;
+        const sunriseLocal = weather.sys.sunrise    + weather.timezone;
+        const sunsetLocal  = weather.sys.sunset     + weather.timezone;
+        isDark = localUnix < sunriseLocal || localUnix > sunsetLocal;
+      } else {
+        // Fallback: device local hour with 6 AM / 6 PM thresholds
+        const hour = new Date().getHours();
+        isDark = hour < 6 || hour >= 18;
+      }
+
+      orb.classList.toggle('orb--dark',  isDark);
+      orb.classList.toggle('orb--light', !isDark);
+
+      const duration = isDark ? '1.2s' : '0.8s';
+      orb.style.transition = `box-shadow ${duration} ease, filter ${duration} ease`;
+    });
+  }, [weather]);
 
   // Geocoding autocomplete — debounce 400 ms, call OWM /geo/1.0/direct
   useEffect(() => {

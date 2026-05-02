@@ -157,25 +157,168 @@ main {
     0 0 25px 9px rgba(30, 60, 120, 0.35),
     0 0 68px 20px rgba(30, 60, 120, 0.15);
   filter: brightness(1.08) contrast(1.05);
+  /* Universal 1.2s — JS shortens to 0.8s in daylight for a crisper feel */
+  transition: box-shadow 1.2s ease, filter 1.2s ease;
   animation: orb-shimmer 5s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
+/* Shimmer breathes through filter only — box-shadow stays static and transitionable */
 @keyframes orb-shimmer {
 
   0%,
   100% {
-    box-shadow: 0 0 25px 9px rgba(30, 60, 120, 0.35), 0 0 68px 20px rgba(30, 60, 120, 0.15);
+    filter: brightness(1.08) contrast(1.05);
   }
 
   50% {
-    box-shadow: 0 0 30px 11px rgba(30, 60, 120, 0.38), 0 0 78px 24px rgba(30, 60, 120, 0.18);
+    filter: brightness(1.13) contrast(1.06);
   }
 }
 
-/* Pulse while weather is loading */
+/* ── Dark mode: Night / Thunderstorm / Extreme / Heavy Rain / Ice ── */
+/* Orb deepens and breathes more light, wider atmospheric halo */
+.app.night-mode .reflections-orb,
+.app.night .reflections-orb,
+.app.thunderstorm .reflections-orb,
+.app.extreme .reflections-orb,
+.app.heavy-rain .reflections-orb,
+.app.ice .reflections-orb {
+  box-shadow:
+    0 0 90px 28px rgba(30, 60, 120, 0.42),
+    0 0 160px 55px rgba(18, 36, 90, 0.18);
+  animation: orb-shimmer-dark 5s ease-in-out infinite;
+}
+
+@keyframes orb-shimmer-dark {
+
+  0%,
+  100% {
+    filter: brightness(1.15) contrast(1.06);
+  }
+
+  50% {
+    filter: brightness(1.22) contrast(1.07);
+  }
+}
+
+/* ── Per-condition hue anchors — glide between weather states ── */
+
+/* Clouds: mid blue-grey, calm and open */
+.app.clouds .reflections-orb {
+  box-shadow:
+    0 0 30px 10px rgba(100, 130, 180, 0.35),
+    0 0 75px 22px rgba(100, 130, 180, 0.14);
+}
+
+/* Rain: deep cinematic blue */
+.app.rain .reflections-orb {
+  box-shadow:
+    0 0 38px 13px rgba(60, 90, 150, 0.45),
+    0 0 90px 30px rgba(60, 90, 150, 0.20);
+  animation: orb-shimmer-rain 5s ease-in-out infinite;
+}
+
+@keyframes orb-shimmer-rain {
+
+  0%,
+  100% {
+    filter: brightness(1.08) contrast(1.06) saturate(1.10);
+  }
+
+  50% {
+    filter: brightness(1.14) contrast(1.07) saturate(1.14);
+  }
+}
+
+/* Snow: ethereal crystalline white-blue */
+.app.snow .reflections-orb {
+  box-shadow:
+    0 0 38px 13px rgba(200, 220, 255, 0.40),
+    0 0 90px 30px rgba(220, 240, 255, 0.18);
+  animation: orb-shimmer-snow 5s ease-in-out infinite;
+}
+
+@keyframes orb-shimmer-snow {
+
+  0%,
+  100% {
+    filter: brightness(1.12) contrast(1.02) saturate(0.90);
+  }
+
+  50% {
+    filter: brightness(1.20) contrast(1.03) saturate(0.85);
+  }
+}
+
+/* Mist / Fog / Haze: muted, receding */
+.app.mist .reflections-orb {
+  box-shadow:
+    0 0 28px 9px rgba(140, 160, 190, 0.30),
+    0 0 70px 20px rgba(140, 160, 190, 0.12);
+}
+
+/* Cold: cool steel-blue */
+.app.cold .reflections-orb {
+  box-shadow:
+    0 0 30px 10px rgba(80, 110, 170, 0.38),
+    0 0 75px 22px rgba(80, 110, 170, 0.16);
+}
+
+/* Loading variants for new conditions */
+.app.rain .reflections-orb.orb-loading {
+  animation: orb-shimmer-rain 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
+}
+
+.app.snow .reflections-orb.orb-loading {
+  animation: orb-shimmer-snow 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
+}
+
+/* ── Light mode: Warm / Hot / Scorching / Sunrise / Sunset ── */
+/* Orb softens and merges with the pale atmosphere */
+.app.warm .reflections-orb,
+.app.hot .reflections-orb,
+.app.scorching .reflections-orb,
+.app.sunrise .reflections-orb,
+.app.sunset .reflections-orb {
+  box-shadow:
+    0 0 60px 18px rgba(80, 120, 200, 0.25),
+    0 0 28px 8px rgba(80, 120, 200, 0.12);
+  animation: orb-shimmer-light 5s ease-in-out infinite;
+}
+
+@keyframes orb-shimmer-light {
+
+  0%,
+  100% {
+    filter: brightness(0.95) contrast(1.02) saturate(1.05);
+  }
+
+  50% {
+    filter: brightness(0.98) contrast(1.03) saturate(1.08);
+  }
+}
+
+/* Pulse while weather is loading — context shimmer + pulse stack */
 .reflections-orb.orb-loading {
   animation: orb-shimmer 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
+}
+
+.app.night-mode .reflections-orb.orb-loading,
+.app.night .reflections-orb.orb-loading,
+.app.thunderstorm .reflections-orb.orb-loading,
+.app.extreme .reflections-orb.orb-loading,
+.app.heavy-rain .reflections-orb.orb-loading,
+.app.ice .reflections-orb.orb-loading {
+  animation: orb-shimmer-dark 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
+}
+
+.app.warm .reflections-orb.orb-loading,
+.app.hot .reflections-orb.orb-loading,
+.app.scorching .reflections-orb.orb-loading,
+.app.sunrise .reflections-orb.orb-loading,
+.app.sunset .reflections-orb.orb-loading {
+  animation: orb-shimmer-light 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
 }
 
 @keyframes orb-pulse {
@@ -190,6 +333,29 @@ main {
     transform: scale(1.18);
     opacity: 1;
   }
+}
+
+/* ── Time-of-day classes (JS-applied via API sunrise/sunset — highest priority) ── */
+.reflections-orb.orb--dark {
+  box-shadow:
+    0 0 90px 28px rgba(30, 60, 120, 0.42),
+    0 0 160px 55px rgba(18, 36, 90, 0.18);
+  animation: orb-shimmer-dark 5s ease-in-out infinite;
+}
+
+.reflections-orb.orb--light {
+  box-shadow:
+    0 0 60px 18px rgba(80, 120, 200, 0.25),
+    0 0 28px 8px rgba(80, 120, 200, 0.12);
+  animation: orb-shimmer-light 5s ease-in-out infinite;
+}
+
+.reflections-orb.orb--dark.orb-loading {
+  animation: orb-shimmer-dark 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
+}
+
+.reflections-orb.orb--light.orb-loading {
+  animation: orb-shimmer-light 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
 }
 
 /* Wordmark */
