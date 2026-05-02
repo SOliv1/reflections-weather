@@ -45,9 +45,17 @@ const getWeatherClass = (weather) => {
   const sunriseLocal = weather.sys.sunrise + weather.timezone;
   const sunsetLocal = weather.sys.sunset + weather.timezone;
   const goldenWindow = 45 * 60; // 45 minutes in seconds
-  const isNight  = localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow;
+  // Social thresholds — dusk from 18:30, evening/night from 19:30 (overrides long summer days)
+  const localSecs = ((localUnix % 86400) + 86400) % 86400;
+  const localHour = localSecs / 3600;
+  const SOCIAL_DUSK_HOUR  = 18.5; // 18:30
+  const SOCIAL_NIGHT_HOUR = 19.5; // 19:30
+  const astroIsNight = localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow;
+  const isSocialNight = !astroIsNight && localHour >= SOCIAL_NIGHT_HOUR;
+  const isSocialDusk  = !astroIsNight && !isSocialNight && localHour >= SOCIAL_DUSK_HOUR;
+  const isNight   = astroIsNight || isSocialNight;
   const isSunrise = !isNight && localUnix < sunriseLocal + goldenWindow;
-  const isSunset  = !isNight && !isSunrise && localUnix > sunsetLocal - goldenWindow;
+  const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk);
 
   // Clouds at night → moon-through-clouds image; at golden hour → sunrise/sunset
   if (condition === 'Clouds') {
@@ -82,7 +90,10 @@ const isNightAtCity = (weather) => {
   const localUnix  = now + weather.timezone;
   const sunrise    = weather.sys.sunrise + weather.timezone;
   const sunset     = weather.sys.sunset  + weather.timezone;
-  return localUnix < sunrise - 30 * 60 || localUnix > sunset + 30 * 60;
+  const localSecs  = ((localUnix % 86400) + 86400) % 86400;
+  const localHour  = localSecs / 3600;
+  // Social evening: treat 19:30+ as night regardless of astronomical sunset
+  return localUnix < sunrise - 30 * 60 || localUnix > sunset + 30 * 60 || localHour >= 19.5;
 };
 
 // Returns time-of-day label + icon based on city's local solar position
@@ -95,15 +106,21 @@ const getTimeOfDay = (weather) => {
   const golden     = 40 * 60; // 40-minute golden-hour window
   const noonLocal  = sunrise + dayLen / 2;
 
-  if (local < sunrise - golden)                         return { label: 'Night',       icon: '🌙' };
-  if (local < sunrise)                                  return { label: 'Dawn',        icon: '🌄' };
-  if (local < sunrise + golden)                         return { label: 'Morning',     icon: '🌅' };
-  if (local < noonLocal - 60 * 60)                      return { label: 'Morning',     icon: '☀️' };
-  if (local < noonLocal + 60 * 60)                      return { label: 'Noon',        icon: '🌞' };
-  if (local < sunset - golden)                          return { label: 'Afternoon',   icon: '🌤️' };
-  if (local < sunset)                                   return { label: 'Dusk',        icon: '🌇' };
-  if (local < sunset + golden)                          return { label: 'Evening',     icon: '🌆' };
-  return                                                       { label: 'Night',       icon: '🌙' };
+  const localSecs = ((local % 86400) + 86400) % 86400;
+  const localHour  = localSecs / 3600;
+
+  if (local < sunrise - golden)                                    return { label: 'Night',     icon: '🌙' };
+  if (local < sunrise)                                             return { label: 'Dawn',      icon: '🌄' };
+  if (local < sunrise + golden)                                    return { label: 'Morning',   icon: '🌅' };
+  if (local < noonLocal - 60 * 60)                                 return { label: 'Morning',   icon: '☀️' };
+  if (local < noonLocal + 60 * 60)                                 return { label: 'Noon',      icon: '🌞' };
+  // Social thresholds — dusk at 18:30, evening at 19:30, even before astronomical sunset
+  if (localHour >= 19.5 && local < sunset + golden)               return { label: 'Evening',   icon: '🌆' };
+  if (localHour >= 18.5 && local < sunset)                        return { label: 'Dusk',      icon: '🌇' };
+  if (local < sunset - golden)                                     return { label: 'Afternoon', icon: '🌤️' };
+  if (local < sunset)                                              return { label: 'Dusk',      icon: '🌇' };
+  if (local < sunset + golden)                                     return { label: 'Evening',   icon: '🌆' };
+  return                                                                  { label: 'Night',      icon: '🌙' };
 };
 
 function TimeOfDayBadge({ weather }) {
@@ -399,16 +416,18 @@ function App() {
 
       let isDark;
       if (weather.sys && weather.timezone !== undefined) {
-        // Precise: compare current UTC unix against city-local sunrise/sunset
+        // Precise: API sunrise/sunset + social dusk threshold (18:30)
         const now = Math.floor(Date.now() / 1000);
-        const localUnix    = now                    + weather.timezone;
-        const sunriseLocal = weather.sys.sunrise    + weather.timezone;
-        const sunsetLocal  = weather.sys.sunset     + weather.timezone;
-        isDark = localUnix < sunriseLocal || localUnix > sunsetLocal;
+        const localUnix    = now                 + weather.timezone;
+        const sunriseLocal = weather.sys.sunrise + weather.timezone;
+        const sunsetLocal  = weather.sys.sunset  + weather.timezone;
+        const localSecs    = ((localUnix % 86400) + 86400) % 86400;
+        const localHour    = localSecs / 3600;
+        isDark = localUnix < sunriseLocal || localUnix > sunsetLocal || localHour >= 18.5;
       } else {
-        // Fallback: device local hour with 6 AM / 6 PM thresholds
-        const hour = new Date().getHours();
-        isDark = hour < 6 || hour >= 18;
+        // Fallback: device local hour — dusk at 18:30
+        const hour = new Date().getHours() + new Date().getMinutes() / 60;
+        isDark = hour < 6 || hour >= 18.5;
       }
 
       orb.classList.toggle('orb--dark',  isDark);
