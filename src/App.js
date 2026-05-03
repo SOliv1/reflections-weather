@@ -625,6 +625,18 @@ function App() {
         fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
           .then(res => res.json())
           .then(result => {
+            if (result.cod === 401) {
+              setError('API key error — check the WEATHER_API_KEY environment variable in Netlify.');
+              setLocating(false);
+              setSplashHidden(true);
+              return;
+            }
+            if (!result.main) {
+              setError('Could not fetch weather for your location.');
+              setLocating(false);
+              setSplashHidden(true);
+              return;
+            }
             setWeather(result);
             setError('');
             setLocating(false);
