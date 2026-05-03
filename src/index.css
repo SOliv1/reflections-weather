@@ -1597,7 +1597,14 @@ main {
   align-items: flex-end;
   justify-content: center;
 
-  background: linear-gradient(170deg, #0d1b2a 0%, #1a3a5c 40%, #0e2a3e 70%, #060e18 100%);
+  /* MidnightGlow+ — deeper indigo core, lifted mid-atmosphere */
+  background: linear-gradient(170deg,
+      #03070F 0%,
+      #060A1F 18%,
+      #0B1530 38%,
+      #0E1C40 55%,
+      #080F28 75%,
+      #020509 100%);
   background-size: cover;
   background-position: center;
 
@@ -1606,15 +1613,33 @@ main {
   transition: opacity 1.1s ease;
 }
 
-/* Subtle vignette at the base to ground the title */
+/* Vertical light falloff — top sealed dark, base gently illuminated */
 .app-splash::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom,
-      transparent 45%,
-      rgba(4, 10, 20, 0.72) 100%);
+  background:
+    linear-gradient(to bottom,
+      rgba(2, 4, 12, 0.60) 0%,
+      rgba(2, 4, 12, 0.20) 20%,
+      transparent 42%,
+      rgba(8, 14, 38, 0.28) 68%,
+      rgba(4, 8, 22, 0.80) 100%);
   pointer-events: none;
+  z-index: 0;
+}
+
+/* Faint atmospheric mist centred behind the orb */
+.app-splash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 58% 28% at 50% 40%,
+      rgba(27, 42, 90, 0.20) 0%,
+      rgba(18, 30, 72, 0.10) 48%,
+      transparent 72%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .app-splash.hidden {
@@ -1625,10 +1650,11 @@ main {
 /* Content sits in the lower-third — cinematic title zone */
 .splash-content {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 4px;
   padding: 0 32px 10vh;
   text-align: center;
   width: 100%;
@@ -1640,14 +1666,14 @@ main {
   height: clamp(140px, 40vw, 300px);
   object-fit: cover;
   border-radius: 50%;
-  /* MidnightGlow+ — deeper core, wider atmospheric halo, inner shimmer */
+  /* MidnightGlow+ splash — deeper core, 6% wider halo, inner shimmer */
   box-shadow:
-    0 0 18px 7px rgba(6, 10, 31, 0.75),
-    0 0 55px 18px rgba(27, 42, 90, 0.44),
-    0 0 138px 58px rgba(36, 58, 122, 0.20);
-  margin-bottom: 16px;
+    0 0 19px 7px rgba(6, 10, 31, 0.78),
+    0 0 58px 19px rgba(27, 42, 90, 0.48),
+    0 0 148px 62px rgba(36, 58, 122, 0.22);
+  margin-bottom: 20px;
   animation: orbArrive 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-  filter: brightness(1.08) contrast(1.06) saturate(1.08);
+  filter: brightness(1.10) contrast(1.07) saturate(1.10);
   will-change: transform, opacity;
 }
 
@@ -1673,17 +1699,17 @@ main {
   0%,
   100% {
     box-shadow:
-      0 0 18px 7px rgba(6, 10, 31, 0.75),
-      0 0 55px 18px rgba(27, 42, 90, 0.44),
-      0 0 138px 58px rgba(36, 58, 122, 0.20);
+      0 0 19px 7px rgba(6, 10, 31, 0.78),
+      0 0 58px 19px rgba(27, 42, 90, 0.48),
+      0 0 148px 62px rgba(36, 58, 122, 0.22);
     transform: scale(1);
   }
 
   50% {
     box-shadow:
-      0 0 22px 9px rgba(6, 10, 31, 0.80),
-      0 0 70px 26px rgba(27, 42, 90, 0.50),
-      0 0 162px 74px rgba(36, 58, 122, 0.24);
+      0 0 24px 10px rgba(6, 10, 31, 0.83),
+      0 0 74px 28px rgba(27, 42, 90, 0.54),
+      0 0 172px 79px rgba(36, 58, 122, 0.26);
     transform: scale(1.05);
   }
 }
