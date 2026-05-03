@@ -825,6 +825,87 @@ main {
   text-shadow: 1px 2px rgba(50, 50, 70, 0.5);
 }
 
+/* ── Weather Summary ───────────────────────── */
+.weather-summary-card {
+  max-width: 600px;
+  margin: 20px auto 0;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 2px solid rgba(180, 155, 255, 0.45);
+  border-radius: 18px;
+  color: #fff;
+  text-align: left;
+}
+
+.weather-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.weather-summary-icon {
+  font-size: 13px;
+  color: rgba(190, 165, 255, 0.9);
+  line-height: 1;
+}
+
+.weather-summary-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.weather-summary-body {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Subtle per-condition accent on the top border */
+.app.night-mode .weather-summary-card,
+.app.night .weather-summary-card {
+  border-top-color: rgba(100, 120, 220, 0.55);
+}
+
+.app.thunderstorm .weather-summary-card,
+.app.extreme .weather-summary-card,
+.app.heavy-rain .weather-summary-card {
+  border-top-color: rgba(80, 110, 200, 0.6);
+}
+
+.app.rain .weather-summary-card {
+  border-top-color: rgba(100, 160, 210, 0.5);
+}
+
+.app.snow .weather-summary-card,
+.app.ice .weather-summary-card {
+  border-top-color: rgba(180, 215, 255, 0.55);
+}
+
+.app.sunrise .weather-summary-card {
+  border-top-color: rgba(255, 175, 100, 0.55);
+}
+
+.app.sunset .weather-summary-card {
+  border-top-color: rgba(240, 130, 80, 0.55);
+}
+
+.app.hot .weather-summary-card,
+.app.scorching .weather-summary-card,
+.app.warm .weather-summary-card {
+  border-top-color: rgba(255, 190, 80, 0.5);
+}
+
 .error-message {
   max-width: 600px;
   margin: 12px auto 0;

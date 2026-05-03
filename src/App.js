@@ -215,6 +215,135 @@ function CityClockFace({ timezone }) {
   );
 }
 
+// Generates 3 atmospheric, brand-voice sentences from live weather + forecast data.
+// No external AI API — pure deterministic narrative built from OWM fields.
+const buildWeatherSummary = (weather, forecast) => {
+  const city = weather.name;
+  const temp = Math.round(weather.main.temp);
+  const feelsLike = Math.round(weather.main.feels_like);
+  const condition = weather.weather[0].main;
+  const id = weather.weather[0].id;
+  const humidity = weather.main.humidity;
+  const windSpeed = Math.round(weather.wind.speed * 3.6);
+  const { label: todLabel } = getTimeOfDay(weather);
+  const wClass = getWeatherClass(weather);
+
+  const todPhrase =
+    todLabel === 'Night'     ? 'tonight'       :
+    todLabel === 'Dawn'      ? 'at dawn'        :
+    todLabel === 'Sunrise'   ? 'at sunrise'     :
+    todLabel === 'Noon'      ? 'at midday'      :
+    todLabel === 'Morning'   ? 'this morning'   :
+    todLabel === 'Afternoon' ? 'this afternoon' :
+    todLabel === 'Dusk'      ? 'at dusk'        :
+    todLabel === 'Evening'   ? 'this evening'   : 'now';
+
+  // ── Opening — atmospheric description of now ──
+  let opening;
+  if (wClass === 'thunderstorm') {
+    opening = `Thunder rolls across ${city}, lightning cutting through sheets of heavy rain.`;
+  } else if (wClass === 'extreme') {
+    opening = `Severe conditions grip ${city} ${todPhrase} — the atmosphere is unsettled and rapidly changing.`;
+  } else if (wClass === 'heavy-rain') {
+    opening = `Heavy rain is falling steadily over ${city} ${todPhrase}, the streets running slick with water.`;
+  } else if (wClass === 'rain' || condition === 'Drizzle') {
+    opening = id >= 300 && id < 400
+      ? `A fine drizzle drifts across ${city} ${todPhrase}, soft and quietly persistent.`
+      : `Rain moves through ${city} ${todPhrase}, keeping the air cool and the light low.`;
+  } else if (wClass === 'snow') {
+    opening = `Snow falls quietly over ${city} ${todPhrase}, softening every edge and muffling the world below.`;
+  } else if (wClass === 'ice') {
+    opening = `A deep freeze has settled over ${city} ${todPhrase}, the cold sharp and unforgiving.`;
+  } else if (wClass === 'mist') {
+    opening = `A veil of mist hangs over ${city} ${todPhrase}, softening the light and dissolving the distance.`;
+  } else if (wClass === 'night') {
+    opening = `${city} rests under a quiet night sky ${todPhrase}, still and deep.`;
+  } else if (wClass === 'sunrise') {
+    opening = `Dawn is breaking over ${city}, the sky warming slowly as the first light arrives.`;
+  } else if (wClass === 'sunset') {
+    opening = `The day draws to a close over ${city}, the sky painting itself in fading colour.`;
+  } else if (wClass === 'clouds') {
+    opening = `Clouds drift across ${city} ${todPhrase}, keeping the light soft and the air mild.`;
+  } else if (wClass === 'scorching') {
+    opening = `An intense heat bears down on ${city} ${todPhrase}, the air shimmering above the ground.`;
+  } else if (wClass === 'hot') {
+    opening = `Warm, golden light fills ${city} ${todPhrase} beneath open skies.`;
+  } else if (wClass === 'warm') {
+    opening = `A pleasant warmth settles over ${city} ${todPhrase}, the sky clear and wide.`;
+  } else if (wClass === 'cold') {
+    opening = `Cold, crisp air wraps around ${city} ${todPhrase}, sharp and clean against the skin.`;
+  } else {
+    opening = `The sky over ${city} ${todPhrase} holds ${weather.weather[0].description}.`;
+  }
+
+  // ── Middle — temperature range + texture ──
+  const todayLow  = Math.round(weather.main.temp_min);
+  const todayHigh = Math.round(weather.main.temp_max);
+  const rangePhrase = `a low of ${todayLow}°C to a high of ${todayHigh}°C`;
+  let middle;
+  const tempDiff = Math.abs(temp - feelsLike);
+  if (windSpeed > 50) {
+    middle = `Temperatures range from ${rangePhrase}, though winds gusting at ${windSpeed} km/h make it feel far harsher than the numbers suggest.`;
+  } else if (windSpeed > 25 && tempDiff >= 3) {
+    middle = `Temperatures range from ${rangePhrase}, with the wind pulling the feels-like reading down to ${feelsLike}°C — worth dressing for.`;
+  } else if (temp > 30 && humidity > 70) {
+    middle = `Temperatures range from ${rangePhrase}, though humidity at ${humidity}% adds a close, heavy weight to the air — the kind you feel in your lungs.`;
+  } else if (wClass === 'ice' || temp < -5) {
+    middle = `Temperatures range from ${rangePhrase}, feeling like ${feelsLike}°C — exposed skin will feel the bite within moments.`;
+  } else if (wClass === 'scorching' || temp >= 38) {
+    middle = `Temperatures range from ${rangePhrase}, feeling like ${feelsLike}°C — shade and hydration are not optional today.`;
+  } else if (tempDiff >= 4) {
+    middle = `Temperatures range from ${rangePhrase}, though it feels closer to ${feelsLike}°C — ${feelsLike < temp ? 'the wind is doing its work' : 'the humidity adds weight to the air'}.`;
+  } else {
+    middle = `Temperatures range from ${rangePhrase} — ${temp < 10 ? 'cool enough to warrant an extra layer' : temp > 25 ? 'warm and pleasant throughout' : 'comfortable for most of the day'}.`;
+  }
+
+  // ── Closing — forecast horizon or reflective note ──
+  let closing;
+  if (forecast && forecast.length >= 1) {
+    const tomorrow = forecast[0];
+    const tmrMain = tomorrow.weather[0].main.toLowerCase();
+    const tmrHigh = Math.round(tomorrow.main.temp_max);
+    const tmrLow  = Math.round(tomorrow.main.temp_min);
+    if (tmrMain === 'thunderstorm') {
+      closing = `Tomorrow brings thunderstorms — a significant change is already on its way.`;
+    } else if (tmrMain === 'rain' || tmrMain === 'drizzle') {
+      closing = `Rain is expected tomorrow, with temperatures ranging between ${tmrLow}°C and ${tmrHigh}°C.`;
+    } else if (tmrMain === 'snow') {
+      closing = `Snow is forecast for tomorrow — conditions will tighten before they ease.`;
+    } else if (tmrMain === 'clear') {
+      closing = `Clearer skies are ahead tomorrow, with a high of ${tmrHigh}°C.`;
+    } else if (tmrMain === 'clouds') {
+      closing = `Cloud cover is set to continue into tomorrow, though temperatures should climb to ${tmrHigh}°C.`;
+    } else {
+      closing = `Tomorrow looks to bring ${tmrMain} conditions, with a high near ${tmrHigh}°C.`;
+    }
+  } else {
+    if (wClass === 'night')                          closing = `A good time to slow down and rest.`;
+    else if (wClass === 'sunrise')                   closing = `A new day begins — watch how it unfolds.`;
+    else if (wClass === 'rain' || wClass === 'heavy-rain') closing = `The kind of day that calls for staying close to home.`;
+    else if (wClass === 'thunderstorm')              closing = `Caution is advised until the storm has passed.`;
+    else                                             closing = `Take a moment and look up — the sky always has something to say.`;
+  }
+
+  return [opening, middle, closing];
+};
+
+function WeatherSummary({ weather, forecast }) {
+  const sentences = buildWeatherSummary(weather, forecast);
+  return (
+    <div className="weather-summary-card">
+      <div className="weather-summary-header">
+        <span className="weather-summary-icon" aria-hidden="true">✦</span>
+        <span className="weather-summary-title">Weather Summary</span>
+      </div>
+      <p className="weather-summary-body">
+        {sentences.join(' ')}
+      </p>
+    </div>
+  );
+}
+
 function App() {
   const [query, setQuery] = useState('');
   const [weather, setWeather] = useState({});
@@ -845,6 +974,7 @@ function App() {
               <div className="info-value">{timeBuilder(weather.sys.sunset, weather.timezone)}</div>
             </div>
           </div>
+          <WeatherSummary weather={weather} forecast={forecast} />
           {forecast.length > 0 && (
             <div className="forecast-strip">
               {forecast.map(day => (
