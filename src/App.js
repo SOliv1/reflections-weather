@@ -974,7 +974,7 @@ function App() {
             alt=""
             aria-hidden="true"
           />
-          <h1 className="splash-title">Reflections: Weather</h1>
+          <h1 className="splash-title">Reflections: Weather Atmosphere</h1>
           <p className="splash-subtitle">A Reflections Experience</p>
           <div className="splash-status">
             {locating && (
@@ -996,7 +996,7 @@ function App() {
             alt=""
             aria-hidden="true"
           />
-          <h1 className="reflections-title">Reflections: Weather</h1>
+          <h1 className="reflections-title">Reflections: Weather Atmosphere</h1>
         </header>
         <div className="search-box" ref={searchWrapRef}>
           <div className="search-pill">
