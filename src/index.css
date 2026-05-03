@@ -1184,6 +1184,334 @@ main {
   margin-top: 2px;
 }
 
+/* ── One Call 3.0 — shared section label ── */
+.oc-section-label {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 28px auto 10px;
+}
+
+/* ── Hourly forecast ribbon ── */
+.hourly-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hourly-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.hourly-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.hourly-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.hourly-card {
+  flex: 0 0 auto;
+  min-width: 68px;
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 10px 8px;
+  text-align: center;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.hourly-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hourly-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.hourly-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+}
+
+.hourly-temp {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.hourly-pop {
+  font-size: 11px;
+  color: rgba(160, 210, 255, 0.85);
+  margin-top: 3px;
+}
+
+/* ── 8-Day accordion ── */
+.eightday-section {
+  max-width: 600px;
+  margin: 8px auto 0;
+}
+
+.eightday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.eightday-row {
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.eightday-row.open {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.eightday-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.eightday-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.eightday-dayname {
+  font-size: 14px;
+  font-weight: 500;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.eightday-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.eightday-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  flex: 1;
+}
+
+.eightday-pop {
+  font-size: 12px;
+  color: rgba(160, 210, 255, 0.85);
+  flex-shrink: 0;
+}
+
+.eightday-temps {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.eightday-high {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.eightday-low {
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.eightday-chevron {
+  font-size: 20px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.4);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.eightday-chevron.open {
+  transform: rotate(90deg);
+}
+
+/* Expanded detail panel */
+.eightday-detail {
+  padding: 0 16px 14px;
+  animation: detailExpand 0.2s ease;
+}
+
+@keyframes detailExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eightday-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.eightday-detail-tile {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.eightday-detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+}
+
+.eightday-detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Weather Alerts (OneCall 3.0) ── */
+.alerts-section {
+  max-width: 600px;
+  margin: 12px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(220, 60, 40, 0.22);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 100, 80, 0.35);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #fff;
+}
+
+.alert-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.alert-event {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.alert-source {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Reflections: History placeholder ── */
+.history-section {
+  max-width: 600px;
+  margin: 48px auto 32px;
+  text-align: center;
+}
+
+.history-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 32px;
+}
+
+.history-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.history-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+}
+
+.history-tagline {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.history-coming-soon {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* ── API usage footer ── */
+.api-usage-footer {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.22);
+  padding: 12px 0 28px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* ── Mobile / responsive ── */
 @media (max-width: 600px) {
   main {

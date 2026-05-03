@@ -215,6 +215,21 @@ function CityClockFace({ timezone }) {
   );
 }
 
+// Shared pure helpers — used by summary, hourly and 8-day components
+const timeBuilder = (unixTime, timezoneOffset) => {
+  const date = new Date((unixTime + timezoneOffset) * 1000);
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+const windDirection = (deg) => {
+  const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return dirs[Math.round(deg / 45) % 8];
+};
+
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
 // Generates 3 atmospheric, brand-voice sentences from live weather + forecast data.
 // No external AI API — pure deterministic narrative built from OWM fields.
 const buildWeatherSummary = (weather, forecast) => {
@@ -344,11 +359,177 @@ function WeatherSummary({ weather, forecast }) {
   );
 }
 
+function HourlyForecast({ hourly, timezoneOffset, displayTemp, tempUnit }) {
+  return (
+    <div className="hourly-section">
+      <div className="oc-section-label">Hourly Forecast</div>
+      <div className="hourly-strip">
+        {hourly.slice(0, 24).map(hour => {
+          const d = new Date((hour.dt + timezoneOffset) * 1000);
+          const timeStr = `${d.getUTCHours().toString().padStart(2, '0')}:00`;
+          const pop = hour.pop ? Math.round(hour.pop * 100) : 0;
+          return (
+            <div key={hour.dt} className="hourly-card">
+              <div className="hourly-time">{timeStr}</div>
+              <img
+                className="hourly-icon"
+                src={`https://openweathermap.org/img/wn/${hour.weather[0].icon}@2x.png`}
+                alt={hour.weather[0].description}
+              />
+              <div className="hourly-temp">{displayTemp(hour.temp)}{tempUnit}</div>
+              {pop > 0 && <div className="hourly-pop">💧 {pop}%</div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function EightDayForecast({ daily, timezoneOffset, displayTemp, tempUnit }) {
+  const [openDay, setOpenDay] = useState(null);
+  const wDirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+  return (
+    <div className="eightday-section">
+      <div className="oc-section-label">8-Day Forecast</div>
+      <div className="eightday-list">
+        {daily.slice(0, 8).map((day, i) => {
+          const d = new Date((day.dt + timezoneOffset) * 1000);
+          const dayName = i === 0 ? 'Today' : d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
+          const isOpen = openDay === i;
+          const pop = day.pop ? Math.round(day.pop * 100) : 0;
+          const windKmh = Math.round(day.wind_speed * 3.6);
+          const wDir = wDirs[Math.round(day.wind_deg / 45) % 8];
+          return (
+            <div key={day.dt} className={`eightday-row${isOpen ? ' open' : ''}`}>
+              <button
+                className="eightday-header"
+                onClick={() => setOpenDay(isOpen ? null : i)}
+                aria-expanded={isOpen}
+              >
+                <span className="eightday-dayname">{dayName}</span>
+                <img
+                  className="eightday-icon"
+                  src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
+                  alt={day.weather[0].description}
+                />
+                <span className="eightday-desc">{capitalize(day.weather[0].main)}</span>
+                {pop > 0 && <span className="eightday-pop">💧 {pop}%</span>}
+                <span className="eightday-temps">
+                  <span className="eightday-high">{displayTemp(day.temp.max)}{tempUnit}</span>
+                  <span className="eightday-low">{displayTemp(day.temp.min)}{tempUnit}</span>
+                </span>
+                <span className={`eightday-chevron${isOpen ? ' open' : ''}`}>›</span>
+              </button>
+              {isOpen && (
+                <div className="eightday-detail">
+                  <div className="eightday-detail-grid">
+                    <div className="eightday-detail-tile">
+                      <div className="eightday-detail-label">Feels like</div>
+                      <div className="eightday-detail-value">{displayTemp(day.feels_like.day)}{tempUnit}</div>
+                    </div>
+                    <div className="eightday-detail-tile">
+                      <div className="eightday-detail-label">Humidity</div>
+                      <div className="eightday-detail-value">{day.humidity}%</div>
+                    </div>
+                    <div className="eightday-detail-tile">
+                      <div className="eightday-detail-label">Wind</div>
+                      <div className="eightday-detail-value">{windKmh} km/h {wDir}</div>
+                    </div>
+                    <div className="eightday-detail-tile">
+                      <div className="eightday-detail-label">UV Index</div>
+                      <div className="eightday-detail-value">{Math.round(day.uvi)}</div>
+                    </div>
+                    <div className="eightday-detail-tile">
+                      <div className="eightday-detail-label">Sunrise</div>
+                      <div className="eightday-detail-value">{timeBuilder(day.sunrise, timezoneOffset)}</div>
+                    </div>
+                    <div className="eightday-detail-tile">
+                      <div className="eightday-detail-label">Sunset</div>
+                      <div className="eightday-detail-value">{timeBuilder(day.sunset, timezoneOffset)}</div>
+                    </div>
+                    {day.rain != null && (
+                      <div className="eightday-detail-tile">
+                        <div className="eightday-detail-label">Rain</div>
+                        <div className="eightday-detail-value">{day.rain.toFixed(1)} mm</div>
+                      </div>
+                    )}
+                    {day.snow != null && (
+                      <div className="eightday-detail-tile">
+                        <div className="eightday-detail-label">Snow</div>
+                        <div className="eightday-detail-value">{day.snow.toFixed(1)} mm</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Weather alerts (OneCall 3.0) ──
+function AlertsBanner({ alerts }) {
+  if (!alerts || alerts.length === 0) return null;
+  return (
+    <div className="alerts-section">
+      {alerts.map((alert, i) => (
+        <div key={i} className="alert-card">
+          <span className="alert-icon" aria-hidden="true">⚠️</span>
+          <div className="alert-body">
+            <div className="alert-event">{alert.event}</div>
+            {alert.sender_name && (
+              <div className="alert-source">{alert.sender_name}</div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Reflections: History placeholder ──
+function HistorySection() {
+  return (
+    <div className="history-section">
+      <div className="history-divider" />
+      <div className="history-header">
+        <span className="history-title">Reflections: History</span>
+        <span className="history-tagline">47 Years of Weather Patterns</span>
+      </div>
+      <p className="history-coming-soon">Coming soon</p>
+    </div>
+  );
+}
+
 function App() {
   const [query, setQuery] = useState('');
   const [weather, setWeather] = useState({});
   const [forecast, setForecast] = useState([]);
+  const [oneCall, setOneCall] = useState(null);
   const [error, setError] = useState('');
+
+  // API usage counter — persisted in localStorage, resets daily
+  const [apiUsageCount, setApiUsageCount] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('apiUsage')) || {};
+      const today = new Date().toISOString().split('T')[0];
+      return stored.date === today ? (stored.count || 0) : 0;
+    } catch { return 0; }
+  });
+
+  const incrementApiUsage = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const stored = JSON.parse(localStorage.getItem('apiUsage')) || {};
+    if (stored.date !== today) { stored.date = today; stored.count = 0; }
+    stored.count = (stored.count || 0) + 1;
+    localStorage.setItem('apiUsage', JSON.stringify(stored));
+    setApiUsageCount(stored.count);
+  };
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isCelsius, setIsCelsius] = useState(true);
   const [locating, setLocating] = useState(false);
@@ -402,6 +583,7 @@ function App() {
 
   // Fetch forecast (5-day / 3-hourly) and extract one reading per day at midday
   const fetchForecast = (param) => {
+    incrementApiUsage();
     fetch(`${api.base}forecast?${param}&units=metric&APPID=${api.key}`)
       .then(res => res.json())
       .then(data => {
@@ -419,6 +601,15 @@ function App() {
       });
   };
 
+  // Fetch One Call 3.0 — hourly + 8-day daily
+  const fetchOneCall = (lat, lon) => {
+    incrementApiUsage();
+    fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=metric&exclude=minutely&appid=${api.key}`)
+      .then(res => res.json())
+      .then(data => { if (data.hourly) setOneCall(data); })
+      .catch(() => {});
+  };
+
   // Geolocation — load weather for user's current position
   const geoLocate = () => {
     if (!navigator.geolocation) {
@@ -430,6 +621,7 @@ function App() {
       (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
         const param = `lat=${lat}&lon=${lon}`;
+        incrementApiUsage();
         fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
           .then(res => res.json())
           .then(result => {
@@ -438,6 +630,7 @@ function App() {
             setLocating(false);
             setSplashHidden(true);
             fetchForecast(param);
+            fetchOneCall(lat, lon);
           })
           .catch(() => { setError('Could not fetch weather for your location.'); setLocating(false); setSplashHidden(true); });
       },
@@ -605,16 +798,19 @@ function App() {
     setGeoOpen(false);
     setQuery('');
     const param = `lat=${result.lat}&lon=${result.lon}`;
+    incrementApiUsage();
     fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
       .then(res => res.json())
       .then(r => {
         if (r.cod === '404' || r.cod === 401) {
           setError(`Could not load "${result.name}".`);
           setWeather({});
+          setOneCall(null);
         } else {
           setWeather(r);
           setError('');
           fetchForecast(param);
+          fetchOneCall(result.lat, result.lon);
         }
       })
       .catch(() => setError('Network error.'));
@@ -702,16 +898,19 @@ function App() {
     const param = city.lat != null
       ? `lat=${city.lat}&lon=${city.lon}`
       : city.id ? `id=${city.id}` : `q=${city.q}`;
+    incrementApiUsage();
     fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
       .then(res => res.json())
       .then(result => {
         if (result.cod === '404' || result.cod === 401) {
           setError(`Could not load "${city.name}".`);
           setWeather({});
+          setOneCall(null);
         } else {
           setWeather(result);
           setError('');
           fetchForecast(param);
+          fetchOneCall(result.coord.lat, result.coord.lon);
         }
         console.log(result);
       })
@@ -721,16 +920,19 @@ function App() {
   const doSearch = () => {
     if (!query.trim()) return;
     const param = `q=${query}`;
+    incrementApiUsage();
     fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
       .then(res => res.json())
       .then(result => {
         if (result.cod === '404' || result.cod === 401) {
           setError(result.cod === 401 ? 'API key error. Check your .env file.' : `City "${query}" not found. Try a research station e.g. McMurdo Station,AQ`);
           setWeather({});
+          setOneCall(null);
         } else {
           setWeather(result);
           setError('');
           fetchForecast(param);
+          fetchOneCall(result.coord.lat, result.coord.lon);
         }
         setQuery('');
         console.log(result);
@@ -744,22 +946,6 @@ function App() {
     const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
-
-  // Converts Unix timestamp + timezone offset (seconds) to local HH:MM
-  const timeBuilder = (unixTime, timezoneOffset) => {
-    const date = new Date((unixTime + timezoneOffset) * 1000);
-    const hours = date.getUTCHours().toString().padStart(2, '0');
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
-
-  // Converts wind degrees to compass bearing
-  const windDirection = (deg) => {
-    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    return dirs[Math.round(deg / 45) % 8];
-  }
-
-  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
     <div className={`app${weather.main ? ` ${getWeatherClass(weather)}` : ''}${weather.main && isNightAtCity(weather) ? ' night-mode' : ''}`}>
@@ -975,27 +1161,29 @@ function App() {
             </div>
           </div>
           <WeatherSummary weather={weather} forecast={forecast} />
-          {forecast.length > 0 && (
-            <div className="forecast-strip">
-              {forecast.map(day => (
-                <div key={day.dt} className="forecast-card">
-                  <div className="forecast-day">
-                    {new Date(day.dt * 1000).toLocaleDateString('en-GB', { weekday: 'short' })}
-                  </div>
-                  <img
-                    className="forecast-icon"
-                    src={`https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`}
-                    alt={day.weather[0].description}
-                  />
-                  <div className="forecast-desc">{capitalize(day.weather[0].main)}</div>
-                  <div className="forecast-temp">{displayTemp(day.main.temp_max)}{tempUnit}</div>
-                  <div className="forecast-low">{displayTemp(day.main.temp_min)}{tempUnit}</div>
-                </div>
-              ))}
-            </div>
+          {oneCall && (
+            <>
+              <HourlyForecast
+                hourly={oneCall.hourly}
+                timezoneOffset={oneCall.timezone_offset}
+                displayTemp={displayTemp}
+                tempUnit={tempUnit}
+              />
+              <EightDayForecast
+                daily={oneCall.daily}
+                timezoneOffset={oneCall.timezone_offset}
+                displayTemp={displayTemp}
+                tempUnit={tempUnit}
+              />
+              <AlertsBanner alerts={oneCall.alerts} />
+            </>
           )}
         </div>
         ) : ('')}
+        <HistorySection />
+        <footer className="api-usage-footer">
+          API usage today: {apiUsageCount} / 2,000
+        </footer>
       </main>
     </div>
   );
