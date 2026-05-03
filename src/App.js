@@ -506,6 +506,26 @@ function HistorySection() {
   );
 }
 
+// ── 10-minute weather cache ──────────────────────────────────────────────────
+const CACHE_TTL = 10 * 60 * 1000;
+
+const getWeatherCache = (key) => {
+  try {
+    const store = JSON.parse(localStorage.getItem('weatherCache') || '{}');
+    const entry = store[key];
+    if (entry && Date.now() - entry.timestamp < CACHE_TTL) return entry.data;
+  } catch { /* */ }
+  return null;
+};
+
+const setWeatherCache = (key, data) => {
+  try {
+    const store = JSON.parse(localStorage.getItem('weatherCache') || '{}');
+    store[key] = { data, timestamp: Date.now() };
+    localStorage.setItem('weatherCache', JSON.stringify(store));
+  } catch { /* */ }
+};
+
 function App() {
   const [query, setQuery] = useState('');
   const [weather, setWeather] = useState({});
@@ -582,13 +602,13 @@ function App() {
   const tempUnit = isCelsius ? '°C' : '°F';
 
   // Fetch forecast (5-day / 3-hourly) and extract one reading per day at midday
-  const fetchForecast = (param) => {
+  // Returns forecast array — does NOT set state directly
+  const fetchForecastData = (param) => {
     incrementApiUsage();
-    fetch(`${api.base}forecast?${param}&units=metric&APPID=${api.key}`)
+    return fetch(`${api.base}forecast?${param}&units=metric&APPID=${api.key}`)
       .then(res => res.json())
       .then(data => {
-        if (!data.list) return;
-        // Pick the reading closest to 12:00 for each unique date
+        if (!data.list) return [];
         const days = {};
         data.list.forEach(item => {
           const date = item.dt_txt.split(' ')[0];
@@ -597,61 +617,75 @@ function App() {
             days[date] = item;
           }
         });
-        setForecast(Object.values(days).slice(1, 6)); // skip today, show next 5
-      });
+        return Object.values(days).slice(1, 6);
+      })
+      .catch(() => []);
   };
 
-  // Fetch One Call 3.0 — hourly + 8-day daily
-  const fetchOneCall = (lat, lon) => {
+  // Returns OneCall data — does NOT set state directly
+  const fetchOneCallData = (lat, lon) => {
     incrementApiUsage();
-    fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=metric&exclude=minutely&appid=${api.key}`)
+    return fetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&units=metric&exclude=minutely,alerts&appid=${api.key}`)
       .then(res => res.json())
-      .then(data => { if (data.hourly) setOneCall(data); })
-      .catch(() => {});
+      .then(data => (data.hourly ? data : null))
+      .catch(() => null);
   };
 
-  // Geolocation — load weather for user's current position
-  const geoLocate = () => {
+  // Geolocation — load weather for user's current position (only called on explicit button press)
+  const geoLocate = async () => {
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.');
       return;
     }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
+        const cacheKey = `lat:${lat.toFixed(2)}:lon:${lon.toFixed(2)}`;
+        const cached = getWeatherCache(cacheKey);
+        if (cached) {
+          setWeather(cached.weather);
+          setForecast(cached.forecast);
+          setOneCall(cached.oneCall);
+          setError('');
+          setLocating(false);
+          setSplashHidden(true);
+          return;
+        }
         const param = `lat=${lat}&lon=${lon}`;
         incrementApiUsage();
-        fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
-          .then(res => res.json())
-          .then(result => {
-            if (result.cod === 401) {
-              setError('API key error — check the WEATHER_API_KEY environment variable in Netlify.');
-              setLocating(false);
-              setSplashHidden(true);
-              return;
-            }
-            if (!result.main) {
-              setError('Could not fetch weather for your location.');
-              setLocating(false);
-              setSplashHidden(true);
-              return;
-            }
-            setWeather(result);
-            setError('');
-            setLocating(false);
-            setSplashHidden(true);
-            fetchForecast(param);
-            fetchOneCall(lat, lon);
-          })
-          .catch(() => { setError('Could not fetch weather for your location.'); setLocating(false); setSplashHidden(true); });
+        try {
+          const res = await fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`);
+          const result = await res.json();
+          if (result.cod === 401) {
+            setError('API key error — check the WEATHER_API_KEY environment variable in Netlify.');
+            setLocating(false); setSplashHidden(true); return;
+          }
+          if (!result.main) {
+            setError('Could not fetch weather for your location.');
+            setLocating(false); setSplashHidden(true); return;
+          }
+          const [forecastData, oneCallData] = await Promise.all([
+            fetchForecastData(param),
+            fetchOneCallData(lat, lon),
+          ]);
+          setWeather(result);
+          setForecast(forecastData);
+          setOneCall(oneCallData);
+          setError('');
+          setLocating(false);
+          setSplashHidden(true);
+          setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData });
+        } catch {
+          setError('Could not fetch weather for your location.');
+          setLocating(false); setSplashHidden(true);
+        }
       },
       () => { setError('Location access denied.'); setLocating(false); setSplashHidden(true); }
     );
   };
 
-  // Auto-geolocate on first load
-  useEffect(() => { geoLocate(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // No auto-fetch on load — weather is fetched only when the user selects a location
 
   // Safety-net: always dismiss splash after 7s even if geolocation hangs
   useEffect(() => {
@@ -806,26 +840,39 @@ function App() {
   }, []);
 
   // Load weather from a geocode result (lat/lon)
-  const loadGeoResult = useCallback((result) => {
+  const loadGeoResult = useCallback(async (result) => {
     setGeoOpen(false);
     setQuery('');
+    const cacheKey = `lat:${Number(result.lat).toFixed(2)}:lon:${Number(result.lon).toFixed(2)}`;
+    const cached = getWeatherCache(cacheKey);
+    if (cached) {
+      setWeather(cached.weather);
+      setForecast(cached.forecast);
+      setOneCall(cached.oneCall);
+      setError('');
+      return;
+    }
     const param = `lat=${result.lat}&lon=${result.lon}`;
     incrementApiUsage();
-    fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
-      .then(res => res.json())
-      .then(r => {
-        if (r.cod === '404' || r.cod === 401) {
-          setError(`Could not load "${result.name}".`);
-          setWeather({});
-          setOneCall(null);
-        } else {
-          setWeather(r);
-          setError('');
-          fetchForecast(param);
-          fetchOneCall(result.lat, result.lon);
-        }
-      })
-      .catch(() => setError('Network error.'));
+    try {
+      const res = await fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`);
+      const r = await res.json();
+      if (r.cod === '404' || r.cod === 401) {
+        setError(`Could not load "${result.name}".`);
+        setWeather({});
+        setOneCall(null);
+      } else {
+        const [forecastData, oneCallData] = await Promise.all([
+          fetchForecastData(param),
+          fetchOneCallData(result.lat, result.lon),
+        ]);
+        setWeather(r);
+        setForecast(forecastData);
+        setOneCall(oneCallData);
+        setError('');
+        setWeatherCache(cacheKey, { weather: r, forecast: forecastData, oneCall: oneCallData });
+      }
+    } catch { setError('Network error.'); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Saved city helpers
@@ -905,52 +952,78 @@ function App() {
     ]},
   ];
 
-  const loadPreset = (city) => {
+  const loadPreset = async (city) => {
     setDrawerOpen(false);
     const param = city.lat != null
       ? `lat=${city.lat}&lon=${city.lon}`
       : city.id ? `id=${city.id}` : `q=${city.q}`;
+    const cacheKey = city.lat != null
+      ? `lat:${Number(city.lat).toFixed(2)}:lon:${Number(city.lon).toFixed(2)}`
+      : city.id ? `id:${city.id}` : `q:${city.q.toLowerCase()}`;
+    const cached = getWeatherCache(cacheKey);
+    if (cached) {
+      setWeather(cached.weather);
+      setForecast(cached.forecast);
+      setOneCall(cached.oneCall);
+      setError('');
+      return;
+    }
     incrementApiUsage();
-    fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
-      .then(res => res.json())
-      .then(result => {
-        if (result.cod === '404' || result.cod === 401) {
-          setError(`Could not load "${city.name}".`);
-          setWeather({});
-          setOneCall(null);
-        } else {
-          setWeather(result);
-          setError('');
-          fetchForecast(param);
-          fetchOneCall(result.coord.lat, result.coord.lon);
-        }
-        console.log(result);
-      })
-      .catch(() => setError('Network error.'));
+    try {
+      const res = await fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`);
+      const result = await res.json();
+      if (result.cod === '404' || result.cod === 401) {
+        setError(`Could not load "${city.name}".`);
+        setWeather({});
+        setOneCall(null);
+      } else {
+        const [forecastData, oneCallData] = await Promise.all([
+          fetchForecastData(param),
+          fetchOneCallData(result.coord.lat, result.coord.lon),
+        ]);
+        setWeather(result);
+        setForecast(forecastData);
+        setOneCall(oneCallData);
+        setError('');
+        setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData });
+      }
+    } catch { setError('Network error.'); }
   };
 
-  const doSearch = () => {
+  const doSearch = async () => {
     if (!query.trim()) return;
+    const cacheKey = `q:${query.trim().toLowerCase()}`;
+    const cached = getWeatherCache(cacheKey);
+    if (cached) {
+      setWeather(cached.weather);
+      setForecast(cached.forecast);
+      setOneCall(cached.oneCall);
+      setError('');
+      setQuery('');
+      return;
+    }
     const param = `q=${query}`;
     incrementApiUsage();
-    fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`)
-      .then(res => res.json())
-      .then(result => {
-        if (result.cod === '404' || result.cod === 401) {
-          setError(result.cod === 401 ? 'API key error. Check your .env file.' : `City "${query}" not found. Try a research station e.g. McMurdo Station,AQ`);
-          setWeather({});
-          setOneCall(null);
-        } else {
-          setWeather(result);
-          setError('');
-          fetchForecast(param);
-          fetchOneCall(result.coord.lat, result.coord.lon);
-        }
-        setQuery('');
-        console.log(result);
-        console.log('Weather class applied:', getWeatherClass(result));
-      })
-      .catch(() => setError('Network error. Check your connection.'));
+    try {
+      const res = await fetch(`${api.base}weather?${param}&units=metric&APPID=${api.key}`);
+      const result = await res.json();
+      if (result.cod === '404' || result.cod === 401) {
+        setError(result.cod === 401 ? 'API key error. Check your .env file.' : `City "${query}" not found. Try a research station e.g. McMurdo Station,AQ`);
+        setWeather({});
+        setOneCall(null);
+      } else {
+        const [forecastData, oneCallData] = await Promise.all([
+          fetchForecastData(param),
+          fetchOneCallData(result.coord.lat, result.coord.lon),
+        ]);
+        setWeather(result);
+        setForecast(forecastData);
+        setOneCall(oneCallData);
+        setError('');
+        setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData });
+      }
+      setQuery('');
+    } catch { setError('Network error. Check your connection.'); }
   }
 
   const dateBuilder = (d) => {
