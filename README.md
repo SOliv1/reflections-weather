@@ -10,11 +10,6 @@ View on GitHub pages [Here](http://localhost:3000/reflections-weather)
 ### Key thing to remember: GitHub Pages only updates when you run npm run deploy. Pushing to master updates the source code but not the live site;
 npm run deploy is what builds and ships to gh-pages.
 
-
-View the site [here on Netlify](https://react-weather-openweather.netlify.app/)
-
-View second attempt [here on Netlify](https://react-weather-openweather-2.netlify.app/)
-
 ## Available Scripts
 
 In the project directory, you can run:
