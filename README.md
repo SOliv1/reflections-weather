@@ -5,7 +5,7 @@
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-View on GitHub pages [Here](http://localhost:3000/reflections-weather)
+View on GitHub pages [Here](https://soliv1.github.io/reflections-weather)
 
 ### Key thing to remember: GitHub Pages only updates when you run npm run deploy. Pushing to master updates the source code but not the live site;
 npm run deploy is what builds and ships to gh-pages.
