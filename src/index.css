@@ -147,16 +147,17 @@ main {
   }
 }
 
-/* The orb */
+/* The orb — MidnightGlow+ */
 .reflections-orb {
   width: 52px;
   height: 52px;
   object-fit: cover;
   border-radius: 50%;
   box-shadow:
-    0 0 25px 9px rgba(30, 60, 120, 0.35),
-    0 0 68px 20px rgba(30, 60, 120, 0.15);
-  filter: brightness(1.08) contrast(1.05);
+    0 0 10px 4px rgba(6, 10, 31, 0.72),
+    0 0 28px 10px rgba(27, 42, 90, 0.45),
+    0 0 72px 22px rgba(36, 58, 122, 0.18);
+  filter: brightness(1.08) contrast(1.06);
   /* Universal 1.2s — JS shortens to 0.8s in daylight for a crisper feel */
   transition: box-shadow 1.2s ease, filter 1.2s ease;
   animation: orb-shimmer 5s ease-in-out infinite;
@@ -168,11 +169,19 @@ main {
 
   0%,
   100% {
-    filter: brightness(1.08) contrast(1.05);
+    filter: brightness(1.08) contrast(1.06) saturate(1.08);
+  }
+
+  33% {
+    filter: brightness(1.12) contrast(1.07) saturate(1.11);
   }
 
   50% {
-    filter: brightness(1.13) contrast(1.06);
+    filter: brightness(1.15) contrast(1.07) saturate(1.13);
+  }
+
+  66% {
+    filter: brightness(1.11) contrast(1.06) saturate(1.10);
   }
 }
 
@@ -185,8 +194,9 @@ main {
 .app.heavy-rain .reflections-orb,
 .app.ice .reflections-orb {
   box-shadow:
-    0 0 90px 28px rgba(30, 60, 120, 0.42),
-    0 0 160px 55px rgba(18, 36, 90, 0.18);
+    0 0 12px 5px rgba(6, 10, 31, 0.80),
+    0 0 95px 30px rgba(27, 42, 90, 0.48),
+    0 0 168px 58px rgba(18, 36, 90, 0.20);
   animation: orb-shimmer-dark 5s ease-in-out infinite;
 }
 
@@ -194,11 +204,19 @@ main {
 
   0%,
   100% {
-    filter: brightness(1.15) contrast(1.06);
+    filter: brightness(1.15) contrast(1.07) saturate(1.10);
+  }
+
+  33% {
+    filter: brightness(1.20) contrast(1.08) saturate(1.14);
   }
 
   50% {
-    filter: brightness(1.22) contrast(1.07);
+    filter: brightness(1.25) contrast(1.08) saturate(1.16);
+  }
+
+  66% {
+    filter: brightness(1.19) contrast(1.07) saturate(1.12);
   }
 }
 
@@ -338,15 +356,17 @@ main {
 /* ── Time-of-day classes (JS-applied via API sunrise/sunset — highest priority) ── */
 .reflections-orb.orb--dark {
   box-shadow:
-    0 0 90px 28px rgba(30, 60, 120, 0.42),
-    0 0 160px 55px rgba(18, 36, 90, 0.18);
+    0 0 12px 5px rgba(6, 10, 31, 0.80),
+    0 0 95px 30px rgba(27, 42, 90, 0.48),
+    0 0 168px 58px rgba(18, 36, 90, 0.20);
   animation: orb-shimmer-dark 5s ease-in-out infinite;
 }
 
 .reflections-orb.orb--light {
   box-shadow:
-    0 0 60px 18px rgba(80, 120, 200, 0.25),
-    0 0 28px 8px rgba(80, 120, 200, 0.12);
+    0 0 8px 3px rgba(6, 10, 31, 0.50),
+    0 0 62px 19px rgba(80, 120, 200, 0.26),
+    0 0 30px 9px rgba(80, 120, 200, 0.13);
   animation: orb-shimmer-light 5s ease-in-out infinite;
 }
 
@@ -1620,13 +1640,14 @@ main {
   height: clamp(140px, 40vw, 300px);
   object-fit: cover;
   border-radius: 50%;
-  /* Atmospheric midnight-blue halo — 35-40% opacity, wide soft spread, no neon */
+  /* MidnightGlow+ — deeper core, wider atmospheric halo, inner shimmer */
   box-shadow:
-    0 0 50px 16px rgba(18, 36, 120, 0.38),
-    0 0 130px 55px rgba(12, 28, 90, 0.18);
+    0 0 18px 7px rgba(6, 10, 31, 0.75),
+    0 0 55px 18px rgba(27, 42, 90, 0.44),
+    0 0 138px 58px rgba(36, 58, 122, 0.20);
   margin-bottom: 16px;
   animation: orbArrive 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-  filter: brightness(1.08) contrast(1.05);
+  filter: brightness(1.08) contrast(1.06) saturate(1.08);
   will-change: transform, opacity;
 }
 
@@ -1651,12 +1672,18 @@ main {
 
   0%,
   100% {
-    box-shadow: 0 0 50px 16px rgba(18, 36, 120, 0.38), 0 0 130px 55px rgba(12, 28, 90, 0.18);
+    box-shadow:
+      0 0 18px 7px rgba(6, 10, 31, 0.75),
+      0 0 55px 18px rgba(27, 42, 90, 0.44),
+      0 0 138px 58px rgba(36, 58, 122, 0.20);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 65px 24px rgba(22, 44, 140, 0.42), 0 0 155px 70px rgba(14, 32, 100, 0.22);
+    box-shadow:
+      0 0 22px 9px rgba(6, 10, 31, 0.80),
+      0 0 70px 26px rgba(27, 42, 90, 0.50),
+      0 0 162px 74px rgba(36, 58, 122, 0.24);
     transform: scale(1.05);
   }
 }
