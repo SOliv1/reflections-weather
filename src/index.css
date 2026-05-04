@@ -806,13 +806,24 @@ main {
 }
 
 .temp-range {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.92);
   font-size: 18px;
   font-weight: 300;
   text-align: center;
   text-shadow: 2px 2px rgba(50, 50, 70, 0.5);
-  margin-top: 4px;
+  margin-top: 6px;
   margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.temp-range-label {
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.temp-range-sep {
+  display: inline-block;
+  width: 16px;
 }
 
 .extra-info {
@@ -1050,6 +1061,18 @@ main {
 }
 
 /* ── Geolocation button ── */
+@keyframes geo-idle-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(120, 190, 255, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px rgba(120, 190, 255, 0.16);
+  }
+}
+
 .geo-btn {
   display: flex;
   align-items: center;
@@ -1063,21 +1086,56 @@ main {
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
   margin-right: 4px;
-  transition: background 0.25s ease, transform 0.15s ease;
+  transition: background 0.35s ease, transform 0.15s ease, width 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.4s cubic-bezier(0.22, 1, 0.36, 1), padding 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Labeled state — shown before any weather is loaded */
+.geo-btn--labeled {
+  width: auto;
+  border-radius: 20px;
+  padding: 0 14px 0 10px;
+  gap: 7px;
+  animation: geo-idle-pulse 2.6s ease-in-out 3;
+}
+
+.geo-btn-text {
+  font-family: Montserrat, sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.08em;
+  text-transform: none;
 }
 
 .geo-btn svg {
   width: 18px;
   height: 18px;
+  flex-shrink: 0;
 }
 
 .geo-btn:hover {
   background: linear-gradient(135deg, rgba(100, 200, 255, 0.5), rgba(50, 120, 255, 0.4));
-  transform: scale(1.1);
+  transform: scale(1.04);
 }
 
 .geo-btn:active {
   transform: scale(0.95);
+}
+
+@media (max-width: 400px) {
+  .geo-btn--labeled {
+    width: 40px;
+    border-radius: 50%;
+    padding: 0;
+    gap: 0;
+    animation: none;
+  }
+
+  .geo-btn-text {
+    display: none;
+  }
 }
 
 @keyframes spin {
@@ -1520,6 +1578,230 @@ main {
   text-transform: uppercase;
 }
 
+/* ── Air Quality Index card ── */
+.aqi-card {
+  background: rgba(20, 20, 30, 0.5);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 12px 14px 10px;
+  margin: 12px 0;
+}
+
+.aqi-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.aqi-icon {
+  font-size: 12px;
+}
+
+.aqi-title {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.aqi-index-row {
+  margin-bottom: 10px;
+}
+
+.aqi-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 50px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.aqi-components {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.aqi-comp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 7px;
+  padding: 5px 2px 4px;
+  gap: 1px;
+}
+
+.aqi-comp-label {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.38);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.aqi-comp-value {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.aqi-comp-unit {
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.02em;
+}
+
+.aqi-scale {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.aqi-scale-seg {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  opacity: 0.28;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aqi-scale-seg.active {
+  opacity: 1;
+  transform: scaleY(2.5);
+  transform-origin: center;
+}
+
+/* ── Weather Map card ── */
+.weathermap-card {
+  background: rgba(20, 20, 30, 0.5);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.weathermap-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 20px 10px;
+}
+
+.weathermap-icon {
+  font-size: 15px;
+}
+
+.weathermap-title {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.weathermap-layers {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 14px;
+  flex-wrap: wrap;
+}
+
+.weathermap-layer-btn {
+  padding: 5px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 11px;
+  font-family: Montserrat, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.weathermap-layer-btn.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.weathermap-layer-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.weathermap-viewport {
+  position: relative;
+  width: 100%;
+  height: 130px;
+  overflow: hidden;
+  background: #0a0c14;
+}
+
+.weathermap-grid {
+  position: absolute;
+  width: 768px;
+  height: 768px;
+}
+
+.weathermap-tile {
+  position: absolute;
+  width: 256px;
+  height: 256px;
+}
+
+.weathermap-tile img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 256px;
+  height: 256px;
+}
+
+.weathermap-overlay {
+  opacity: 0.65;
+}
+
+.weathermap-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25), 0 0 14px rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.weathermap-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(4, 6, 18, 0.75) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.weathermap-credit {
+  padding: 7px 20px 10px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.18);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
 /* ── API usage footer ── */
 .api-usage-footer {
   text-align: center;
@@ -1751,6 +2033,21 @@ main {
   margin-bottom: 0;
 }
 
+/* Hint line — arrives after subtitle, whisper-quiet */
+.splash-hint {
+  font-family: Montserrat, sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.26);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  animation: titleArrive 1.1s 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  margin-top: 18px;
+  margin-bottom: 0;
+  line-height: 1.7;
+}
+
 .splash-status {
   display: flex;
   align-items: center;
@@ -1798,6 +2095,12 @@ main {
 
   .splash-subtitle {
     letter-spacing: 0.26em;
+  }
+
+  .splash-hint {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    margin-top: 14px;
   }
 
   /* Deeper bottom vignette — grounds the title on small screens */

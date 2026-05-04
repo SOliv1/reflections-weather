@@ -506,6 +506,141 @@ function HistorySection() {
   );
 }
 
+// ── Air Quality Index card ────────────────────────────────────────────────────
+// Uses OWM /data/2.5/air_pollution — free with any API key, no extra cost.
+const AQI_LEVELS = [
+  null,
+  { label: 'Good',      color: '#4ade80', bg: 'rgba(74, 222, 128, 0.12)'  },
+  { label: 'Fair',      color: '#a3e635', bg: 'rgba(163, 230, 53, 0.12)'  },
+  { label: 'Moderate',  color: '#facc15', bg: 'rgba(250, 204, 21, 0.12)'  },
+  { label: 'Poor',      color: '#fb923c', bg: 'rgba(251, 146, 60, 0.12)'  },
+  { label: 'Very Poor', color: '#f87171', bg: 'rgba(248, 113, 113, 0.12)' },
+];
+
+function AirPollutionCard({ data }) {
+  if (!data) return null;
+  const aqi = data.main.aqi;
+  const level = AQI_LEVELS[aqi];
+  const { co, no2, o3, pm2_5, pm10, so2 } = data.components;
+  const pollutants = [
+    { label: 'PM2.5', value: pm2_5.toFixed(1), unit: 'μg/m³' },
+    { label: 'PM10',  value: pm10.toFixed(1),  unit: 'μg/m³' },
+    { label: 'O₃',   value: o3.toFixed(1),    unit: 'μg/m³' },
+    { label: 'NO₂',  value: no2.toFixed(1),   unit: 'μg/m³' },
+    { label: 'SO₂',  value: so2.toFixed(1),   unit: 'μg/m³' },
+    { label: 'CO',   value: (co / 1000).toFixed(2), unit: 'mg/m³' },
+  ];
+  return (
+    <div className="aqi-card">
+      <div className="aqi-header">
+        <span className="aqi-icon" aria-hidden="true">🌬</span>
+        <span className="aqi-title">Air Quality Index</span>
+      </div>
+      <div className="aqi-index-row">
+        <span
+          className="aqi-badge"
+          style={{ color: level.color, background: level.bg, borderColor: `${level.color}55` }}
+        >
+          {aqi} &mdash; {level.label}
+        </span>
+      </div>
+      <div className="aqi-components">
+        {pollutants.map(({ label, value, unit }) => (
+          <div key={label} className="aqi-comp">
+            <span className="aqi-comp-label">{label}</span>
+            <span className="aqi-comp-value">{value}</span>
+            <span className="aqi-comp-unit">{unit}</span>
+          </div>
+        ))}
+      </div>
+      <div className="aqi-scale" aria-label={`Air quality: ${level.label}`}>
+        {AQI_LEVELS.slice(1).map((l, i) => (
+          <div
+            key={i}
+            className={`aqi-scale-seg${i + 1 === aqi ? ' active' : ''}`}
+            style={{ background: l.color }}
+            title={l.label}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Weather Map card ──────────────────────────────────────────────────────────
+// OWM tile overlays are free (1,000 tiles/day). Base map: OpenStreetMap.
+const MAP_LAYERS = [
+  { id: 'precipitation_new', label: 'Rain' },
+  { id: 'clouds_new',        label: 'Clouds' },
+  { id: 'wind_new',          label: 'Wind' },
+  { id: 'temp_new',          label: 'Temp' },
+];
+
+const latLonToTile = (lat, lon, z) => {
+  const n = Math.pow(2, z);
+  const xf = (lon + 180) / 360 * n;
+  const latR = lat * Math.PI / 180;
+  const yf = (1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2 * n;
+  return { x: Math.floor(xf), y: Math.floor(yf), fx: xf - Math.floor(xf), fy: yf - Math.floor(yf) };
+};
+
+function WeatherMapCard({ lat, lon, apiKey }) {
+  const [layer, setLayer] = useState('precipitation_new');
+  const zoom = 8;
+  const { x: tx, y: ty, fx, fy } = latLonToTile(lat, lon, zoom);
+
+  const tiles = [];
+  for (let row = -1; row <= 1; row++) {
+    for (let col = -1; col <= 1; col++) {
+      tiles.push({ tileX: tx + col, tileY: ty + row, left: (col + 1) * 256, top: (row + 1) * 256 });
+    }
+  }
+
+  // CSS calc centres the exact city lat/lon in the viewport regardless of container width
+  const gridStyle = {
+    left: `calc(50% - ${(1 + fx) * 256}px)`,
+    top:  `calc(50% - ${(1 + fy) * 256}px)`,
+  };
+
+  return (
+    <div className="weathermap-card">
+      <div className="weathermap-header">
+        <span className="weathermap-icon" aria-hidden="true">🗺</span>
+        <span className="weathermap-title">Weather Map</span>
+      </div>
+      <div className="weathermap-layers">
+        {MAP_LAYERS.map(l => (
+          <button
+            key={l.id}
+            className={`weathermap-layer-btn${layer === l.id ? ' active' : ''}`}
+            onClick={() => setLayer(l.id)}
+          >{l.label}</button>
+        ))}
+      </div>
+      <div className="weathermap-viewport">
+        <div className="weathermap-grid" style={gridStyle}>
+          {tiles.map(({ tileX, tileY, left, top }) => (
+            <div key={`${tileX}-${tileY}`} className="weathermap-tile" style={{ left, top }}>
+              <img
+                src={`https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`}
+                alt="" aria-hidden="true" width="256" height="256"
+              />
+              <img
+                src={`https://tile.openweathermap.org/map/${layer}/${zoom}/${tileX}/${tileY}.png?appid=${apiKey}`}
+                alt="" aria-hidden="true" width="256" height="256"
+                className="weathermap-overlay"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="weathermap-pin" aria-hidden="true" />
+        <div className="weathermap-vignette" />
+      </div>
+      <p className="weathermap-credit">Map © OpenStreetMap contributors · Weather © OpenWeatherMap</p>
+    </div>
+  );
+}
+
 // ── 10-minute weather cache ──────────────────────────────────────────────────
 const CACHE_TTL = 10 * 60 * 1000;
 
@@ -531,6 +666,7 @@ function App() {
   const [weather, setWeather] = useState({});
   const [forecast, setForecast] = useState([]);
   const [oneCall, setOneCall] = useState(null);
+  const [airPollution, setAirPollution] = useState(null);
   const [error, setError] = useState('');
 
   // API usage counter — persisted in localStorage, resets daily
@@ -631,6 +767,14 @@ function App() {
       .catch(() => null);
   };
 
+  // Returns Air Pollution data — free with any OWM API key, no extra cost
+  const fetchAirPollutionData = (lat, lon) => {
+    return fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${api.key}`)
+      .then(res => res.json())
+      .then(data => (data.list && data.list.length > 0 ? data.list[0] : null))
+      .catch(() => null);
+  };
+
   // Geolocation — load weather for user's current position (only called on explicit button press)
   const geoLocate = async () => {
     if (!navigator.geolocation) {
@@ -647,6 +791,7 @@ function App() {
           setWeather(cached.weather);
           setForecast(cached.forecast);
           setOneCall(cached.oneCall);
+          setAirPollution(cached.airPollution || null);
           setError('');
           setLocating(false);
           setSplashHidden(true);
@@ -665,17 +810,19 @@ function App() {
             setError('Could not fetch weather for your location.');
             setLocating(false); setSplashHidden(true); return;
           }
-          const [forecastData, oneCallData] = await Promise.all([
+          const [forecastData, oneCallData, airPollutionData] = await Promise.all([
             fetchForecastData(param),
             fetchOneCallData(lat, lon),
+            fetchAirPollutionData(lat, lon),
           ]);
           setWeather(result);
           setForecast(forecastData);
           setOneCall(oneCallData);
+          setAirPollution(airPollutionData);
           setError('');
           setLocating(false);
           setSplashHidden(true);
-          setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData });
+          setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData, airPollution: airPollutionData });
         } catch {
           setError('Could not fetch weather for your location.');
           setLocating(false); setSplashHidden(true);
@@ -849,6 +996,7 @@ function App() {
       setWeather(cached.weather);
       setForecast(cached.forecast);
       setOneCall(cached.oneCall);
+      setAirPollution(cached.airPollution || null);
       setError('');
       return;
     }
@@ -861,16 +1009,19 @@ function App() {
         setError(`Could not load "${result.name}".`);
         setWeather({});
         setOneCall(null);
+        setAirPollution(null);
       } else {
-        const [forecastData, oneCallData] = await Promise.all([
+        const [forecastData, oneCallData, airPollutionData] = await Promise.all([
           fetchForecastData(param),
           fetchOneCallData(result.lat, result.lon),
+          fetchAirPollutionData(result.lat, result.lon),
         ]);
         setWeather(r);
         setForecast(forecastData);
         setOneCall(oneCallData);
+        setAirPollution(airPollutionData);
         setError('');
-        setWeatherCache(cacheKey, { weather: r, forecast: forecastData, oneCall: oneCallData });
+        setWeatherCache(cacheKey, { weather: r, forecast: forecastData, oneCall: oneCallData, airPollution: airPollutionData });
       }
     } catch { setError('Network error.'); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -965,6 +1116,7 @@ function App() {
       setWeather(cached.weather);
       setForecast(cached.forecast);
       setOneCall(cached.oneCall);
+      setAirPollution(cached.airPollution || null);
       setError('');
       return;
     }
@@ -976,16 +1128,19 @@ function App() {
         setError(`Could not load "${city.name}".`);
         setWeather({});
         setOneCall(null);
+        setAirPollution(null);
       } else {
-        const [forecastData, oneCallData] = await Promise.all([
+        const [forecastData, oneCallData, airPollutionData] = await Promise.all([
           fetchForecastData(param),
           fetchOneCallData(result.coord.lat, result.coord.lon),
+          fetchAirPollutionData(result.coord.lat, result.coord.lon),
         ]);
         setWeather(result);
         setForecast(forecastData);
         setOneCall(oneCallData);
+        setAirPollution(airPollutionData);
         setError('');
-        setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData });
+        setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData, airPollution: airPollutionData });
       }
     } catch { setError('Network error.'); }
   };
@@ -998,6 +1153,7 @@ function App() {
       setWeather(cached.weather);
       setForecast(cached.forecast);
       setOneCall(cached.oneCall);
+      setAirPollution(cached.airPollution || null);
       setError('');
       setQuery('');
       return;
@@ -1011,16 +1167,19 @@ function App() {
         setError(result.cod === 401 ? 'API key error. Check your .env file.' : `City "${query}" not found. Try a research station e.g. McMurdo Station,AQ`);
         setWeather({});
         setOneCall(null);
+        setAirPollution(null);
       } else {
-        const [forecastData, oneCallData] = await Promise.all([
+        const [forecastData, oneCallData, airPollutionData] = await Promise.all([
           fetchForecastData(param),
           fetchOneCallData(result.coord.lat, result.coord.lon),
+          fetchAirPollutionData(result.coord.lat, result.coord.lon),
         ]);
         setWeather(result);
         setForecast(forecastData);
         setOneCall(oneCallData);
+        setAirPollution(airPollutionData);
         setError('');
-        setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData });
+        setWeatherCache(cacheKey, { weather: result, forecast: forecastData, oneCall: oneCallData, airPollution: airPollutionData });
       }
       setQuery('');
     } catch { setError('Network error. Check your connection.'); }
@@ -1049,6 +1208,7 @@ function App() {
           />
           <h1 className="splash-title">Reflections: Weather Atmosphere</h1>
           <p className="splash-subtitle">A Reflections Experience</p>
+          <p className="splash-hint">Search any city &nbsp;·&nbsp; or tap&nbsp;◎&nbsp;to reveal your local conditions</p>
           <div className="splash-status">
             {locating && (
               <>
@@ -1073,11 +1233,12 @@ function App() {
         </header>
         <div className="search-box" ref={searchWrapRef}>
           <div className="search-pill">
-            <button className="geo-btn" onClick={geoLocate} aria-label="Use my location" title="Use my location">
+            <button className={`geo-btn${!weather.main ? ' geo-btn--labeled' : ''}`} onClick={geoLocate} aria-label="Use my location" title="Use my location">
               {locating
                 ? <svg className="spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                 : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="9" strokeDasharray="2 4"/></svg>
               }
+              {!weather.main && !locating && <span className="geo-btn-text">My location</span>}
             </button>
             <input
               type="text"
@@ -1212,7 +1373,9 @@ function App() {
             <div className="weather">{capitalize(weather.weather[0].description)}</div>
             <div className="feels-like">Feels like {displayTemp(weather.main.feels_like)}{tempUnit}</div>
             <div className="temp-range">
-              ↑ {displayTemp(weather.main.temp_max)}{tempUnit} &nbsp; ↓ {displayTemp(weather.main.temp_min)}{tempUnit}
+              <span className="temp-range-label">H:</span> {displayTemp(weather.main.temp_max)}{tempUnit}
+              <span className="temp-range-sep"> &nbsp; </span>
+              <span className="temp-range-label">L:</span> {displayTemp(weather.main.temp_min)}{tempUnit}
             </div>
           </div>
           <div className="extra-info">
@@ -1262,6 +1425,14 @@ function App() {
               />
               <AlertsBanner alerts={oneCall.alerts} />
             </>
+          )}
+          <AirPollutionCard data={airPollution} />
+          {weather.coord && (
+            <WeatherMapCard
+              lat={weather.coord.lat}
+              lon={weather.coord.lon}
+              apiKey={api.key}
+            />
           )}
         </div>
         ) : ('')}
