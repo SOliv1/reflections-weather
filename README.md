@@ -1,9 +1,12 @@
 # Getting Started with Create React App
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/4241da37-855e-4259-aa7e-54a7aab27eca/deploy-status)](https://app.netlify.com/sites/react-weather-openweather-2/deploys)
-### *Reflections Atmoshpere [![Netlify Status](https://api.netlify.com/api/v1/badges/d5e177f6-6984-40f4-9c4f-2e2c05fd593c/deploy-status)](https://app.netlify.com/projects/reflections-weather-atmosphere/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)[![Netlify Status](https://api.netlify.com/api/v1/badges/d5e177f6-6984-40f4-9c4f-2e2c05fd593c/deploy-status)](https://app.netlify.com/projects/reflections-weather-atmosphere/deploys)
 
+<img width="2054" height="1155" alt="WeatherSplash" src="https://github.com/user-attachments/assets/15c69c2d-4e1b-4536-bf0e-c552e3768f69" />
+
+
+
+### *Reflections Atmoshpere 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 View on GitHub pages [Here](https://soliv1.github.io/reflections-weather)
 
