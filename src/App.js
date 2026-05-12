@@ -12,6 +12,41 @@ const api = {
   base: "https://api.openweathermap.org/data/2.5/"
 }
 
+// Per-weather-class image pools — multiple images rotate every 60s with a 1.8s crossfade.
+// Add new images to src/assets/ and register them here.
+const IMAGE_POOLS = {
+  extreme:      [require('./assets/extreme.jpg'), require('./assets/extreme02.jpg'), require('./assets/extreme3.jpg')],
+  thunderstorm: [require('./assets/thunderstorm.jpg'), require('./assets/thunderstorm-navi--IA90Li4PYM-unsplash.jpg')],
+  'heavy-rain': [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
+  rain:         [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
+  snow:         [require('./assets/snow.jpg'), require('./assets/snow-aaron-burden-5AiWn2U10cw-unsplash.jpg'), require('./assets/snow-AdobeStock_468560656.jpeg')],
+  ice:          [require('./assets/ice.jpg'), require('./assets/ice0.jpg')],
+  clouds:       [require('./assets/clouds.jpg'), require('./assets/clouds-carlos-torres-MHNjEBeLTgw-unsplash.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg')],
+  mist:         [require('./assets/mist.jpg'), require('./assets/mist-cool-antoine-rault-IhWRrZx4-kk-unsplash.jpg')],
+  scorching:    [require('./assets/scorching.jpg'), require('./assets/scorching-monir-hossain-FAlMcMtmpEw-unsplash.jpg'), require('./assets/scorching-muhammad-usman-hsrz7xgMENg-unsplash.jpg')],
+  hot:          [require('./assets/hot.jpg')],
+  warm:         [require('./assets/warm.jpg')],
+  moderate:     [require('./assets/moderate-simon-henrotte-HSGUMuJoTAA.jpg'), require('./assets/moderate-jeremy-bishop-EwKXn5CapA4-unsplash.jpg'), require('./assets/moderate-inside-dreamatorium-HpVjCnD3pqs-unsplash.jpg')],
+  cold:         [require('./assets/cold.jpg'), require('./assets/cold-pasqualino-capobianco-YPrpSi9Wbxs-unsplash.jpg')],
+  midnight:     [require('./assets/night.jpg'), require('./assets/midnight-paul-lichtblau-qVotvbsuM_c-unsplash.jpg'), require('./assets/midnight-tony-dearwester-s2HFSEfOilA-unsplash.jpg')],
+  night:        [require('./assets/night.jpg'), require('./assets/night-clouds-gregoire-jeanneau-9sxeKzuCVoE-unsplash.jpg')],
+  sunrise:      [require('./assets/sunrise.jpg'), require('./assets/sunrise0.jpg')],
+  sunset:       [require('./assets/sunset.jpg'), require('./assets/sunset-vivaan-trivedii-BhydQXA-sio-unsplash.jpg')],
+  clear:        [require('./assets/clear.jpg')],
+};
+
+// Splash screen slideshow — cycles through weather types while no city is loaded.
+const SPLASH_SEQUENCE = [
+  require('./assets/night.jpg'),
+  require('./assets/sunrise.jpg'),
+  require('./assets/warm.jpg'),
+  require('./assets/clouds.jpg'),
+  require('./assets/rain.jpg'),
+  require('./assets/sunset.jpg'),
+  require('./assets/snow.jpg'),
+  require('./assets/thunderstorm.jpg'),
+];
+
 // OpenWeatherMap returns weather[0].main for condition and weather[0].id for detail.
 // Rain IDs 502-504, 522 = heavy/very heavy/extreme rain.
 // For clear/temperature-based conditions, sunrise/sunset/night override based on local time.
@@ -22,47 +57,40 @@ const getWeatherClass = (weather) => {
   const temp = weather.main.temp;
 
   // Condition-specific images always win (rain/storm/snow/mist look the same day or night)
-  if (condition === 'Extreme') return 'extreme'; // hurricane, tornado, tropical storm, hail (IDs 900-906)
+  if (condition === 'Extreme') return 'extreme';
   if (condition === 'Thunderstorm') return 'thunderstorm';
   if (condition === 'Rain' && id >= 502) return 'heavy-rain';
   if (condition === 'Rain' || condition === 'Drizzle') return 'rain';
-  // Snow at extreme cold shows ice image instead
-  if (condition === 'Snow' && temp < -1) return 'ice';
+  if (condition === 'Snow' && temp < 1) return 'ice';
   if (condition === 'Snow') return 'snow';
-  // For clouds, temperature wins at extremes
-  if (condition === 'Clouds') {
-    if (temp < -1) return 'ice';
-    if (temp <= 5) return 'cold';
-    if (temp >= 40) return 'scorching';
-    if (temp > 30) return 'hot';
-    return 'clouds';
-  }
   if (['Mist', 'Fog', 'Haze', 'Smoke'].includes(condition)) return 'mist';
 
-  // For clear/warm/hot/cold — check local time of day at searched city
-  const now = Math.floor(Date.now() / 1000); // current UTC unix
-  const localUnix = now + weather.timezone;  // shift to city's local time
+  // For all other conditions — check local time of day at searched city
+  const now = Math.floor(Date.now() / 1000);
+  const localUnix = now + weather.timezone;
   const sunriseLocal = weather.sys.sunrise + weather.timezone;
   const sunsetLocal = weather.sys.sunset + weather.timezone;
-  const goldenWindow = 45 * 60; // 45 minutes in seconds
-  // Social thresholds — dusk from 18:30, evening/night from 19:30 (overrides long summer days)
+  const goldenWindow = 45 * 60;
   const localSecs = ((localUnix % 86400) + 86400) % 86400;
   const localHour = localSecs / 3600;
-  const SOCIAL_DUSK_HOUR  = 18.5; // 18:30
-  const SOCIAL_NIGHT_HOUR = 19.5; // 19:30
+  const SOCIAL_DUSK_HOUR  = 18.5;
+  const SOCIAL_NIGHT_HOUR = 19.5;
   const astroIsNight = localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow;
   const isSocialNight = !astroIsNight && localHour >= SOCIAL_NIGHT_HOUR;
   const isSocialDusk  = !astroIsNight && !isSocialNight && localHour >= SOCIAL_DUSK_HOUR;
   const isNight   = astroIsNight || isSocialNight;
   const isSunrise = !isNight && localUnix < sunriseLocal + goldenWindow;
   const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk);
+  const isMidnight = localHour >= 23 || localHour < 3;
 
-  // Clouds at night → moon-through-clouds image; at golden hour → sunrise/sunset
+  // Clouds — temperature extremes first, then time-of-day
   if (condition === 'Clouds') {
-    if (temp < -1) return 'ice';
+    if (temp < 1) return 'ice';
     if (temp <= 5) return 'cold';
     if (temp >= 40) return 'scorching';
     if (temp > 30) return 'hot';
+    if (temp > 16) return 'warm';
+    if (isNight && isMidnight) return 'midnight';
     if (isNight) return 'night';
     if (isSunrise) return 'sunrise';
     if (isSunset) return 'sunset';
@@ -70,9 +98,10 @@ const getWeatherClass = (weather) => {
   }
 
   // Extreme temps override time-of-day entirely
-  if (temp < -1) return 'ice';
+  if (temp < 1) return 'ice';
   if (temp >= 40) return 'scorching';
 
+  if (isNight && isMidnight) return 'midnight';
   if (isNight) return 'night';
   if (isSunrise) return 'sunrise';
   if (isSunset) return 'sunset';
@@ -80,6 +109,7 @@ const getWeatherClass = (weather) => {
   // Daytime temperature-based
   if (temp > 30) return 'hot';
   if (temp > 16) return 'warm';
+  if (temp > 5) return 'moderate';
   return 'cold';
 }
 
@@ -691,6 +721,17 @@ function App() {
   const [locating, setLocating] = useState(false);
   const [splashHidden, setSplashHidden] = useState(false);
 
+  // Background crossfade — two slots, JS switches between them for smooth 1.8s fade
+  const [bgSlots, setBgSlots] = useState(['', '']);
+  const [activeSlot, setActiveSlot] = useState(0);
+  const bgPoolRef = useRef([]);
+  const bgIndexRef = useRef(0);
+
+  // Splash slideshow — two-slot crossfade, same pattern as bg-layer
+  const [splashSlots, setSplashSlots] = useState([SPLASH_SEQUENCE[0], '']);
+  const [splashActive, setSplashActive] = useState(0);
+  const splashSlideIdxRef = useRef(0);
+
   // Geocoding dropdown
   const [geoResults, setGeoResults] = useState([]);
   const [geoOpen, setGeoOpen] = useState(false);
@@ -732,6 +773,60 @@ function App() {
     const tick = setInterval(() => setClock({ time: getBSTTime(), label: getBSTLabel() }), 1000);
     return () => clearInterval(tick);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Derived weather class — used in crossfade effect and JSX className
+  const weatherClass = weather.main ? getWeatherClass(weather) : '';
+
+  // Splash crossfade helper — same two-slot pattern as switchToImage
+  const switchSplashImage = useCallback((url) => {
+    setSplashActive(prev => {
+      const next = 1 - prev;
+      setSplashSlots(slots => {
+        const updated = [...slots];
+        updated[next] = url;
+        return updated;
+      });
+      return next;
+    });
+  }, []);
+
+  // Stable crossfade helper — writes the new URL into the inactive slot then flips it active
+  const switchToImage = useCallback((url) => {
+    setActiveSlot(prev => {
+      const next = 1 - prev;
+      setBgSlots(slots => {
+        const updated = [...slots];
+        updated[next] = url;
+        return updated;
+      });
+      return next;
+    });
+  }, []);
+
+  // Weather background — pick pool from IMAGE_POOLS, start at a random image, rotate every 60s
+  useEffect(() => {
+    if (!weatherClass) return;
+    const pool = IMAGE_POOLS[weatherClass] || IMAGE_POOLS.clear;
+    bgPoolRef.current = pool;
+    bgIndexRef.current = Math.floor(Math.random() * pool.length);
+    switchToImage(pool[bgIndexRef.current]);
+    if (pool.length <= 1) return;
+    const timer = setInterval(() => {
+      bgIndexRef.current = (bgIndexRef.current + 1) % bgPoolRef.current.length;
+      switchToImage(bgPoolRef.current[bgIndexRef.current]);
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [weatherClass, switchToImage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Splash slideshow — tours all weather types as a preview while no weather is loaded
+  useEffect(() => {
+    if (splashHidden) return;
+    const timer = setInterval(() => {
+      splashSlideIdxRef.current = (splashSlideIdxRef.current + 1) % SPLASH_SEQUENCE.length;
+      switchSplashImage(SPLASH_SEQUENCE[splashSlideIdxRef.current]);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [splashHidden, switchSplashImage]);
 
   // Convert temp for display
   const displayTemp = (c) => isCelsius ? Math.round(c) : Math.round(c * 9/5 + 32);
@@ -1191,13 +1286,22 @@ function App() {
     return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
 
+  // Cinematic grain overlay — active only during British Summer Time (BST = UTC+1),
+  // between 18:00 and 21:00 BST, for any weather condition.
+  const isCinematicDusk = clock.label === 'BST' && (() => {
+    const h = parseInt(clock.time.split(':')[0], 10);
+    return h >= 18 && h < 21;
+  })();
+
   return (
-    <div className={`app${weather.main ? ` ${getWeatherClass(weather)}` : ''}${weather.main && isNightAtCity(weather) ? ' night-mode' : ''}`}>
-      {/* ── App Cover Splash ──
-          Replace the placeholder gradient with your cover image by adding to .app-splash in index.css:
-            background-image: url('./assets/your-cover-image.jpg');
-          Place the image in src/assets/ and update the filename above. */}
+    <div className={`app${weatherClass ? ` ${weatherClass}` : ''}${weatherClass && isNightAtCity(weather) ? ' night-mode' : ''}${isCinematicDusk ? ' cinematic-dusk' : ''}`}>
+      {/* Background crossfade layers — JS sets backgroundImage + opacity per weather class */}
+      <div className="bg-layer" style={{ backgroundImage: bgSlots[0] ? `url(${bgSlots[0]})` : 'none', opacity: activeSlot === 0 ? 1 : 0 }} />
+      <div className="bg-layer" style={{ backgroundImage: bgSlots[1] ? `url(${bgSlots[1]})` : 'none', opacity: activeSlot === 1 ? 1 : 0 }} />
+      {/* ── App Cover Splash ── */}
       <div ref={splashRef} className={`app-splash${splashHidden ? ' hidden' : ''}`} aria-hidden={splashHidden}>
+        <div className="splash-bg-layer" style={{ backgroundImage: splashSlots[0] ? `url(${splashSlots[0]})` : 'none', opacity: splashActive === 0 ? 1 : 0 }} />
+        <div className="splash-bg-layer" style={{ backgroundImage: splashSlots[1] ? `url(${splashSlots[1]})` : 'none', opacity: splashActive === 1 ? 1 : 0 }} />
         <div className="splash-content">
           <img
             ref={splashOrbRef}
