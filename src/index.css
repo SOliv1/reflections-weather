@@ -1091,21 +1091,22 @@ main {
   white-space: nowrap;
 }
 
-/* Labeled state — shown before any weather is loaded */
+/* Labeled state — always shown as a pill with text */
 .geo-btn--labeled {
   width: auto;
   border-radius: 20px;
   padding: 0 14px 0 10px;
   gap: 7px;
-  animation: geo-idle-pulse 2.6s ease-in-out 3;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .geo-btn-text {
   font-family: Montserrat, sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.06em;
   text-transform: none;
 }
 
@@ -1124,17 +1125,14 @@ main {
   transform: scale(0.95);
 }
 
-@media (max-width: 400px) {
+@media (max-width: 360px) {
   .geo-btn--labeled {
-    width: 40px;
-    border-radius: 50%;
-    padding: 0;
-    gap: 0;
-    animation: none;
+    padding: 0 10px 0 8px;
+    gap: 5px;
   }
 
   .geo-btn-text {
-    display: none;
+    font-size: 11px;
   }
 }
 
