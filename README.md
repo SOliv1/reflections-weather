@@ -10,6 +10,41 @@ View on GitHub pages [Here](http://localhost:3000/reflections-weather)
 ### Key thing to remember: GitHub Pages only updates when you run npm run deploy. Pushing to master updates the source code but not the live site;
 npm run deploy is what builds and ships to gh-pages.
 
+---
+
+## Branch & Deployment Map
+
+### Two branches — do not confuse them
+
+| Branch | Purpose | Netlify site |
+|---|---|---|
+| `master` | Original simple weather app — base/archive only. Only Dependabot security PRs should merge here. **Do not develop here.** | `react-weather-openweather.netlify.app` |
+| `reflections-weather-atmosphere` | **Active development branch.** Full PRO version — OneCall 3.0, hourly/8-day forecast, pollution levels, temp map, saved cities, API usage counter, cinematic splash. | `reflections-weather-atmosphere.netlify.app` ← **This is the live PRO app** |
+
+### Why the split exists
+`reflections-weather-atmosphere` was created from `master` at commit `f698382`
+("feat: add Weather Summary card") when the app was upgraded to OneCall 3.0 and
+became a significantly more feature-rich product. Master was left as the simpler
+archive so the original could be preserved.
+
+### Workflow for all new work
+Always develop on `reflections-weather-atmosphere`:
+
+```
+git checkout reflections-weather-atmosphere
+git add .
+git commit -m "your message"
+git push origin reflections-weather-atmosphere
+```
+
+Netlify auto-deploys from `reflections-weather-atmosphere` on every push.
+
+### Branch protection rules
+`master` has a "no merge commits" rule — only fast-forward/rebase merges allowed.
+This is intentional to keep master history clean.
+
+---
+
 ## Available Scripts
 
 In the project directory, you can run:
