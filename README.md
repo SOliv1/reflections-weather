@@ -86,6 +86,11 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 I have kept my api keys secret else where, so in order to make project work you need to start the server / project yourself and add your own weather keys. 
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# react-weather
+
+## react-weather
+
+### Deploy to netlify
+(https://react-weather-openweather.netlify.app/)
+
 
 https://home.openweathermap.org/users/sign_in
