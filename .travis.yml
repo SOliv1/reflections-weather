@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "18"
+
+install:
+  - npm install
+
+script:
+  - npm run build
+
+deploy:
+  provider: script
+  script: npx netlify deploy --prod --dir=build --auth=$NETLIFY_AUTH_TOKEN --site=$NETLIFY_SITE_ID
+  skip_cleanup: true
+  on:
+    branch: master
