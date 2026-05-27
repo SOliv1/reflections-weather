@@ -1,6 +1,6 @@
 # Getting Started with Create React App
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)[![Netlify Status](https://api.netlify.com/api/v1/badges/d5e177f6-6984-40f4-9c4f-2e2c05fd593c/deploy-status)](https://app.netlify.com/projects/reflections-weather-atmosphere/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)[![Netlify Status](https://api.netlify.com/api/v1/badges/d5e177f6-6984-40f4-9c4f-2e2c05fd593c/deploy-status)](https://app.netlify.com/projects/reflections-weather-atmosphere/deploys) [![Build Status](https://app.travis-ci.com/SOliv1/reflections-weather.svg?token=6Ng2ZvxzzgEiDzXpAKMF&branch=master)](https://app.travis-ci.com/SOliv1/reflections-weather)
 
 <img width="2054" height="1155" alt="WeatherSplash" src="https://github.com/user-attachments/assets/15c69c2d-4e1b-4536-bf0e-c552e3768f69" />
 
