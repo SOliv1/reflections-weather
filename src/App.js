@@ -12,41 +12,6 @@ const api = {
   base: "https://api.openweathermap.org/data/2.5/"
 }
 
-// Per-weather-class image pools — multiple images rotate every 60s with a 1.8s crossfade.
-// Add new images to src/assets/ and register them here.
-const IMAGE_POOLS = {
-  extreme:      [require('./assets/extreme.jpg'), require('./assets/extreme02.jpg'), require('./assets/extreme3.jpg')],
-  thunderstorm: [require('./assets/thunderstorm.jpg'), require('./assets/thunderstorm-navi--IA90Li4PYM-unsplash.jpg')],
-  'heavy-rain': [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
-  rain:         [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
-  snow:         [require('./assets/snow.jpg'), require('./assets/snow-aaron-burden-5AiWn2U10cw-unsplash.jpg'), require('./assets/snow-AdobeStock_468560656.jpeg')],
-  ice:          [require('./assets/ice.jpg'), require('./assets/ice0.jpg')],
-  clouds:       [require('./assets/clouds.jpg'), require('./assets/clouds-carlos-torres-MHNjEBeLTgw-unsplash.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg')],
-  mist:         [require('./assets/mist.jpg'), require('./assets/mist-cool-antoine-rault-IhWRrZx4-kk-unsplash.jpg')],
-  scorching:    [require('./assets/scorching.jpg'), require('./assets/scorching-monir-hossain-FAlMcMtmpEw-unsplash.jpg'), require('./assets/scorching-muhammad-usman-hsrz7xgMENg-unsplash.jpg')],
-  hot:          [require('./assets/hot.jpg')],
-  warm:         [require('./assets/warm.jpg')],
-  moderate:     [require('./assets/moderate-simon-henrotte-HSGUMuJoTAA.jpg'), require('./assets/moderate-jeremy-bishop-EwKXn5CapA4-unsplash.jpg'), require('./assets/moderate-inside-dreamatorium-HpVjCnD3pqs-unsplash.jpg')],
-  cold:         [require('./assets/cold.jpg'), require('./assets/cold-pasqualino-capobianco-YPrpSi9Wbxs-unsplash.jpg')],
-  midnight:     [require('./assets/night.jpg'), require('./assets/midnight-paul-lichtblau-qVotvbsuM_c-unsplash.jpg'), require('./assets/midnight-tony-dearwester-s2HFSEfOilA-unsplash.jpg')],
-  night:        [require('./assets/night.jpg'), require('./assets/night-clouds-gregoire-jeanneau-9sxeKzuCVoE-unsplash.jpg')],
-  sunrise:      [require('./assets/sunrise.jpg'), require('./assets/sunrise0.jpg')],
-  sunset:       [require('./assets/sunset.jpg'), require('./assets/sunset-vivaan-trivedii-BhydQXA-sio-unsplash.jpg')],
-  clear:        [require('./assets/clear.jpg')],
-};
-
-// Splash screen slideshow — cycles through weather types while no city is loaded.
-const SPLASH_SEQUENCE = [
-  require('./assets/night.jpg'),
-  require('./assets/sunrise.jpg'),
-  require('./assets/warm.jpg'),
-  require('./assets/clouds.jpg'),
-  require('./assets/rain.jpg'),
-  require('./assets/sunset.jpg'),
-  require('./assets/snow.jpg'),
-  require('./assets/thunderstorm.jpg'),
-];
-
 // OpenWeatherMap returns weather[0].main for condition and weather[0].id for detail.
 // Rain IDs 502-504, 522 = heavy/very heavy/extreme rain.
 // For clear/temperature-based conditions, sunrise/sunset/night override based on local time.
@@ -63,6 +28,18 @@ const getWeatherClass = (weather) => {
   if (condition === 'Rain' || condition === 'Drizzle') return 'rain';
   if (condition === 'Snow' && temp < 1) return 'ice';
   if (condition === 'Snow') return 'snow';
+<<<<<<< HEAD
+=======
+  // For clouds, temperature wins at extremes
+  if (condition === 'Clouds') {
+    if (temp < -1) return 'ice';
+    if (temp <= 5) return 'cold';
+    if (temp >= 40) return 'scorching';
+    if (temp > 30) return 'hot';
+    if (id === 804 || weather.clouds?.all >= 75) return 'storm-clouds';
+    return 'clouds';
+  }
+>>>>>>> 733f5d5 (Update weather pools and app logic)
   if (['Mist', 'Fog', 'Haze', 'Smoke'].includes(condition)) return 'mist';
 
   // For all other conditions — check local time of day at searched city
@@ -108,10 +85,26 @@ const getWeatherClass = (weather) => {
 
   // Daytime temperature-based
   if (temp > 30) return 'hot';
+<<<<<<< HEAD
   if (temp > 16) return 'warm';
   if (temp > 5) return 'moderate';
+=======
+  if (temp > 18) return 'warm';
+  if (temp > 11) return 'moderate';
+>>>>>>> 733f5d5 (Update weather pools and app logic)
   return 'cold';
 }
+
+const getWeatherAppClasses = (weather) => {
+  if (!weather.main) return '';
+  return getWeatherClass(weather);
+};
+
+const getWeatherAppStyle = (weather) => {
+  if (!weather.main) return undefined;
+  const backgroundImageUrl = getBackgroundImageUrl(weather, getWeatherClass(weather));
+  return backgroundImageUrl ? { backgroundImage: `url(${backgroundImageUrl})` } : undefined;
+};
 
 // Returns true if it is currently night at the searched city
 const isNightAtCity = (weather) => {
@@ -309,12 +302,16 @@ const buildWeatherSummary = (weather, forecast) => {
     opening = `The day draws to a close over ${city}, the sky painting itself in fading colour.`;
   } else if (wClass === 'clouds') {
     opening = `Clouds drift across ${city} ${todPhrase}, keeping the light soft and the air mild.`;
+  } else if (wClass === 'storm-clouds') {
+    opening = `Storm clouds gather over ${city} ${todPhrase}, darkening the light without necessarily bringing rain.`;
   } else if (wClass === 'scorching') {
     opening = `An intense heat bears down on ${city} ${todPhrase}, the air shimmering above the ground.`;
   } else if (wClass === 'hot') {
     opening = `Warm, golden light fills ${city} ${todPhrase} beneath open skies.`;
   } else if (wClass === 'warm') {
     opening = `A pleasant warmth settles over ${city} ${todPhrase}, the sky clear and wide.`;
+  } else if (wClass === 'moderate') {
+    opening = `A moderate, easy temperature settles over ${city} ${todPhrase}, gentle enough for the day to move slowly.`;
   } else if (wClass === 'cold') {
     opening = `Cold, crisp air wraps around ${city} ${todPhrase}, sharp and clean against the skin.`;
   } else {
@@ -1294,11 +1291,19 @@ function App() {
   })();
 
   return (
+<<<<<<< HEAD
     <div className={`app${weatherClass ? ` ${weatherClass}` : ''}${weatherClass && isNightAtCity(weather) ? ' night-mode' : ''}${isCinematicDusk ? ' cinematic-dusk' : ''}`}>
       {/* Background crossfade layers — JS sets backgroundImage + opacity per weather class */}
       <div className="bg-layer" style={{ backgroundImage: bgSlots[0] ? `url(${bgSlots[0]})` : 'none', opacity: activeSlot === 0 ? 1 : 0 }} />
       <div className="bg-layer" style={{ backgroundImage: bgSlots[1] ? `url(${bgSlots[1]})` : 'none', opacity: activeSlot === 1 ? 1 : 0 }} />
       {/* ── App Cover Splash ── */}
+=======
+    <div className={`app${weather.main ? ` ${getWeatherAppClasses(weather)}` : ''}${weather.main && isNightAtCity(weather) ? ' night-mode' : ''}`} style={getWeatherAppStyle(weather)}>
+      {/* ── App Cover Splash ──
+          Replace the placeholder gradient with your cover image by adding to .app-splash in index.css:
+            background-image: url('./assets/your-cover-image.jpg');
+          Place the image in src/assets/ and update the filename above. */}
+>>>>>>> 733f5d5 (Update weather pools and app logic)
       <div ref={splashRef} className={`app-splash${splashHidden ? ' hidden' : ''}`} aria-hidden={splashHidden}>
         <div className="splash-bg-layer" style={{ backgroundImage: splashSlots[0] ? `url(${splashSlots[0]})` : 'none', opacity: splashActive === 0 ? 1 : 0 }} />
         <div className="splash-bg-layer" style={{ backgroundImage: splashSlots[1] ? `url(${splashSlots[1]})` : 'none', opacity: splashActive === 1 ? 1 : 0 }} />

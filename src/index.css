@@ -46,12 +46,29 @@ body {
   z-index: 1;
 }
 
+<<<<<<< HEAD
 /* Night mode overlay — softens rain/mist/thunderstorm/snow at night
-   without replacing their background image */
-.app.night-mode main::before {
-  content: '';
-  position: fixed;
-  inset: 0;
+=======
+.app.moderate {
+  background-image: url('./assets/AdobeStock_468560656.jpeg');
+}
+
+.app.moderate-adobestock {
+  background-image: url('./assets/AdobeStock_468560656.jpeg');
+}
+
+.app.moderate-simon {
+  background-image: url('./assets/simon-henrotte-HSGUMuJoTAA-unsplash.jpg');
+}
+
+.app.moderate-wolfgang {
+  background-image: url('./assets/wolfgang-hasselmann-R0oueqRY2RE-unsplash.jpg');
+}
+
+.app.warm {
+  background-image: url('./assets/warm.jpg');
+}
+
   background: rgba(4, 8, 22, 0.24);
   pointer-events: none;
   z-index: 0;
@@ -71,12 +88,14 @@ body {
   background-color: rgba(255, 255, 255, 0.5);
 }
 
+.app.moderate .search-box .search-bar,
 .app.warm .search-box .search-bar,
 .app.hot .search-box .search-bar {
   background-color: rgba(255, 255, 255, 0.75);
 }
 
 .app.thunderstorm .search-box .search-bar,
+.app.storm-clouds .search-box .search-bar,
 .app.rain .search-box .search-bar,
 .app.heavy-rain .search-box .search-bar {
   background-color: rgba(255, 255, 255, 0.4);
@@ -159,6 +178,7 @@ main {
 .app.night-mode .reflections-orb,
 .app.night .reflections-orb,
 .app.thunderstorm .reflections-orb,
+.app.storm-clouds .reflections-orb,
 .app.extreme .reflections-orb,
 .app.heavy-rain .reflections-orb,
 .app.ice .reflections-orb {
@@ -263,6 +283,7 @@ main {
 
 /* ── Light mode: Warm / Hot / Scorching / Sunrise / Sunset ── */
 /* Orb softens and merges with the pale atmosphere */
+.app.moderate .reflections-orb,
 .app.warm .reflections-orb,
 .app.hot .reflections-orb,
 .app.scorching .reflections-orb,
@@ -294,12 +315,14 @@ main {
 .app.night-mode .reflections-orb.orb-loading,
 .app.night .reflections-orb.orb-loading,
 .app.thunderstorm .reflections-orb.orb-loading,
+.app.storm-clouds .reflections-orb.orb-loading,
 .app.extreme .reflections-orb.orb-loading,
 .app.heavy-rain .reflections-orb.orb-loading,
 .app.ice .reflections-orb.orb-loading {
   animation: orb-shimmer-dark 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
 }
 
+.app.moderate .reflections-orb.orb-loading,
 .app.warm .reflections-orb.orb-loading,
 .app.hot .reflections-orb.orb-loading,
 .app.scorching .reflections-orb.orb-loading,
@@ -878,6 +901,7 @@ main {
 }
 
 .app.thunderstorm .weather-summary-card,
+.app.storm-clouds .weather-summary-card,
 .app.extreme .weather-summary-card,
 .app.heavy-rain .weather-summary-card {
   border-top-color: rgba(80, 110, 200, 0.6);
@@ -902,7 +926,8 @@ main {
 
 .app.hot .weather-summary-card,
 .app.scorching .weather-summary-card,
-.app.warm .weather-summary-card {
+.app.warm .weather-summary-card,
+.app.moderate .weather-summary-card {
   border-top-color: rgba(255, 190, 80, 0.5);
 }
 
