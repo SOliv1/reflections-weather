@@ -1,9 +1,8 @@
 # Getting Started with Create React App
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/4241da37-855e-4259-aa7e-54a7aab27eca/deploy-status)](https://app.netlify.com/sites/react-weather-openweather-2/deploys)
-### *Reflections-Atmosphere [![Netlify Status](https://api.netlify.com/api/v1/badges/d5e177f6-6984-40f4-9c4f-2e2c05fd593c/deploy-status)](https://app.netlify.com/projects/reflections-weather-atmosphere/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c0345115-04b8-438a-af52-c5c629f6aa10/deploy-status)](https://app.netlify.com/sites/react-weather-openweather/deploys) [![Build Status](https://app.travis-ci.com/SOliv1/reflections-weather.svg?token=6Ng2ZvxzzgEiDzXpAKMF&branch=master)](https://app.travis-ci.com/SOliv1/reflections-weather)
 
+### *Reflections-Atmosphere 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 View on GitHub pages [Here](http://localhost:3000/reflections-weather)
 
