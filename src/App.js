@@ -1270,19 +1270,11 @@ function App() {
   })();
 
   return (
-<<<<<<< HEAD
     <div className={`app${weatherClass ? ` ${weatherClass}` : ''}${weatherClass && isNightAtCity(weather) ? ' night-mode' : ''}${isCinematicDusk ? ' cinematic-dusk' : ''}`}>
       {/* Background crossfade layers — JS sets backgroundImage + opacity per weather class */}
       <div className="bg-layer" style={{ backgroundImage: bgSlots[0] ? `url(${bgSlots[0]})` : 'none', opacity: activeSlot === 0 ? 1 : 0 }} />
       <div className="bg-layer" style={{ backgroundImage: bgSlots[1] ? `url(${bgSlots[1]})` : 'none', opacity: activeSlot === 1 ? 1 : 0 }} />
       {/* ── App Cover Splash ── */}
-=======
-    <div className={`app${weather.main ? ` ${getWeatherAppClasses(weather)}` : ''}${weather.main && isNightAtCity(weather) ? ' night-mode' : ''}`} style={getWeatherAppStyle(weather)}>
-      {/* ── App Cover Splash ──
-          Replace the placeholder gradient with your cover image by adding to .app-splash in index.css:
-            background-image: url('./assets/your-cover-image.jpg');
-          Place the image in src/assets/ and update the filename above. */}
->>>>>>> 733f5d5 (Update weather pools and app logic)
       <div ref={splashRef} className={`app-splash${splashHidden ? ' hidden' : ''}`} aria-hidden={splashHidden}>
         <div className="splash-bg-layer" style={{ backgroundImage: splashSlots[0] ? `url(${splashSlots[0]})` : 'none', opacity: splashActive === 0 ? 1 : 0 }} />
         <div className="splash-bg-layer" style={{ backgroundImage: splashSlots[1] ? `url(${splashSlots[1]})` : 'none', opacity: splashActive === 1 ? 1 : 0 }} />
