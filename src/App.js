@@ -37,21 +37,6 @@ const SPLASH_SEQUENCE = [
   require('./assets/thunderstorm.jpg'),
 ];
 
-// Returns the correct background image URL for the current weather class
-function getBackgroundImageUrl(weather, weatherClass) {
-  const pool = IMAGE_POOLS[weatherClass] || [];
-  if (!pool.length) return '';
-  // Rotate images every 60s based on city, weather, and time
-  const city = weather?.name || '';
-  const id = weather?.weather?.[0]?.id || 0;
-  const temp = Math.round(weather?.main?.temp || 0);
-  const timezone = weather?.timezone || 0;
-  const localUnix = Math.floor(Date.now() / 1000) + timezone;
-  const minuteBlock = Math.floor(localUnix / 60);
-  const seed = `${city}-${id}-${temp}-${minuteBlock}`;
-  const idx = [...seed].reduce((total, char) => total + char.charCodeAt(0), 0) % pool.length;
-  return pool[idx];
-}
 
 // Country code → flag emoji
 const flag = (code) => code
