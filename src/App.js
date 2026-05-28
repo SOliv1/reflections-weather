@@ -58,19 +58,6 @@ const getWeatherClass = (weather) => {
   const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk);
   const isMidnight = localHour >= 23 || localHour < 3;
 
-  if (condition === 'Clouds') {
-    if (temp < 1) return 'ice';
-    if (temp <= 5) return 'cold';
-    if (temp >= 40) return 'scorching';
-    if (temp > 30) return 'hot';
-    if (temp > 16) return 'warm';
-    if (isNight && isMidnight) return 'midnight';
-    if (isNight) return 'night';
-    if (isSunrise) return 'sunrise';
-    if (isSunset) return 'sunset';
-    return 'clouds';
-  }
-
   // Extreme temps override time-of-day entirely
   if (temp < 1) return 'ice';
   if (temp >= 40) return 'scorching';
@@ -84,59 +71,6 @@ const getWeatherClass = (weather) => {
   if (temp > 30) return 'hot';
   if (temp > 16) return 'warm';
   if (temp > 5) return 'moderate';
-  return 'cold';
-  if (['Mist', 'Fog', 'Haze', 'Smoke'].includes(condition)) return 'mist';
-
-  // For all other conditions — check local time of day at searched city
-  const now = Math.floor(Date.now() / 1000);
-  const localUnix = now + weather.timezone;
-  const sunriseLocal = weather.sys.sunrise + weather.timezone;
-  const sunsetLocal = weather.sys.sunset + weather.timezone;
-  const goldenWindow = 45 * 60;
-  const localSecs = ((localUnix % 86400) + 86400) % 86400;
-  const localHour = localSecs / 3600;
-  const SOCIAL_DUSK_HOUR  = 18.5;
-  const SOCIAL_NIGHT_HOUR = 19.5;
-  const astroIsNight = localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow;
-  const isSocialNight = !astroIsNight && localHour >= SOCIAL_NIGHT_HOUR;
-  const isSocialDusk  = !astroIsNight && !isSocialNight && localHour >= SOCIAL_DUSK_HOUR;
-  const isNight   = astroIsNight || isSocialNight;
-  const isSunrise = !isNight && localUnix < sunriseLocal + goldenWindow;
-  const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk);
-  const isMidnight = localHour >= 23 || localHour < 3;
-
-  // Clouds — temperature extremes first, then time-of-day
-  if (condition === 'Clouds') {
-    if (temp < 1) return 'ice';
-    if (temp <= 5) return 'cold';
-    if (temp >= 40) return 'scorching';
-    if (temp > 30) return 'hot';
-    if (temp > 16) return 'warm';
-    if (isNight && isMidnight) return 'midnight';
-    if (isNight) return 'night';
-    if (isSunrise) return 'sunrise';
-    if (isSunset) return 'sunset';
-    return 'clouds';
-  }
-
-  // Extreme temps override time-of-day entirely
-  if (temp < 1) return 'ice';
-  if (temp >= 40) return 'scorching';
-
-  if (isNight && isMidnight) return 'midnight';
-  if (isNight) return 'night';
-  if (isSunrise) return 'sunrise';
-  if (isSunset) return 'sunset';
-
-  // Daytime temperature-based
-  if (temp > 30) return 'hot';
-<<<<<<< HEAD
-  if (temp > 16) return 'warm';
-  if (temp > 5) return 'moderate';
-=======
-  if (temp > 18) return 'warm';
-  if (temp > 11) return 'moderate';
->>>>>>> 733f5d5 (Update weather pools and app logic)
   return 'cold';
 }
 
