@@ -1,3 +1,8 @@
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import './index.js';
+import './index.css';
+
 // Per-weather-class image pools — multiple images rotate every 60s with a 1.8s crossfade.
 const IMAGE_POOLS = {
   extreme:      [require('./assets/extreme.jpg'), require('./assets/extreme02.jpg'), require('./assets/extreme3.jpg')],
@@ -47,9 +52,6 @@ function getBackgroundImageUrl(weather, weatherClass) {
   const idx = [...seed].reduce((total, char) => total + char.charCodeAt(0), 0) % pool.length;
   return pool[idx];
 }
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import './index.js';
-import './index.css';
 
 // Country code → flag emoji
 const flag = (code) => code
