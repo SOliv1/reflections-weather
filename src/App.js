@@ -1,3 +1,52 @@
+// Per-weather-class image pools — multiple images rotate every 60s with a 1.8s crossfade.
+const IMAGE_POOLS = {
+  extreme:      [require('./assets/extreme.jpg'), require('./assets/extreme02.jpg'), require('./assets/extreme3.jpg')],
+  thunderstorm: [require('./assets/thunderstorm.jpg'), require('./assets/thunderstorm-navi--IA90Li4PYM-unsplash.jpg')],
+  'heavy-rain': [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
+  rain:         [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
+  snow:         [require('./assets/snow.jpg'), require('./assets/snow-aaron-burden-5AiWn2U10cw-unsplash.jpg'), require('./assets/snow-AdobeStock_468560656.jpeg')],
+  ice:          [require('./assets/ice.jpg'), require('./assets/ice0.jpg')],
+  clouds:       [require('./assets/clouds.jpg'), require('./assets/clouds-carlos-torres-MHNjEBeLTgw-unsplash.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg')],
+  mist:         [require('./assets/mist.jpg'), require('./assets/mist-cool-antoine-rault-IhWRrZx4-kk-unsplash.jpg')],
+  scorching:    [require('./assets/scorching.jpg'), require('./assets/scorching-monir-hossain-FAlMcMtmpEw-unsplash.jpg'), require('./assets/scorching-muhammad-usman-hsrz7xgMENg-unsplash.jpg')],
+  hot:          [require('./assets/hot.jpg')],
+  warm:         [require('./assets/warm.jpg')],
+  moderate:     [require('./assets/moderate-simon-henrotte-HSGUMuJoTAA.jpg'), require('./assets/moderate-jeremy-bishop-EwKXn5CapA4-unsplash.jpg'), require('./assets/moderate-inside-dreamatorium-HpVjCnD3pqs-unsplash.jpg')],
+  cold:         [require('./assets/cold.jpg'), require('./assets/cold-pasqualino-capobianco-YPrpSi9Wbxs-unsplash.jpg')],
+  midnight:     [require('./assets/night.jpg'), require('./assets/midnight-paul-lichtblau-qVotvbsuM_c-unsplash.jpg'), require('./assets/midnight-tony-dearwester-s2HFSEfOilA-unsplash.jpg')],
+  night:        [require('./assets/night.jpg'), require('./assets/night-clouds-gregoire-jeanneau-9sxeKzuCVoE-unsplash.jpg')],
+  sunrise:      [require('./assets/sunrise.jpg'), require('./assets/sunrise0.jpg')],
+  sunset:       [require('./assets/sunset.jpg'), require('./assets/sunset-vivaan-trivedii-BhydQXA-sio-unsplash.jpg')],
+  clear:        [require('./assets/clear.jpg')],
+};
+
+// Splash screen slideshow — cycles through weather types while no city is loaded.
+const SPLASH_SEQUENCE = [
+  require('./assets/night.jpg'),
+  require('./assets/sunrise.jpg'),
+  require('./assets/warm.jpg'),
+  require('./assets/clouds.jpg'),
+  require('./assets/rain.jpg'),
+  require('./assets/sunset.jpg'),
+  require('./assets/snow.jpg'),
+  require('./assets/thunderstorm.jpg'),
+];
+
+// Returns the correct background image URL for the current weather class
+function getBackgroundImageUrl(weather, weatherClass) {
+  const pool = IMAGE_POOLS[weatherClass] || [];
+  if (!pool.length) return '';
+  // Rotate images every 60s based on city, weather, and time
+  const city = weather?.name || '';
+  const id = weather?.weather?.[0]?.id || 0;
+  const temp = Math.round(weather?.main?.temp || 0);
+  const timezone = weather?.timezone || 0;
+  const localUnix = Math.floor(Date.now() / 1000) + timezone;
+  const minuteBlock = Math.floor(localUnix / 60);
+  const seed = `${city}-${id}-${temp}-${minuteBlock}`;
+  const idx = [...seed].reduce((total, char) => total + char.charCodeAt(0), 0) % pool.length;
+  return pool[idx];
+}
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './index.js';
 import './index.css';
