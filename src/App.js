@@ -125,16 +125,6 @@ const getWeatherClass = (weather) => {
   return 'cold';
 }
 
-const getWeatherAppClasses = (weather) => {
-  if (!weather.main) return '';
-  return getWeatherClass(weather);
-};
-
-const getWeatherAppStyle = (weather) => {
-  if (!weather.main) return undefined;
-  const backgroundImageUrl = getBackgroundImageUrl(weather, getWeatherClass(weather));
-  return backgroundImageUrl ? { backgroundImage: `url(${backgroundImageUrl})` } : undefined;
-};
 
 // Returns true if it is currently night at the searched city
 const isNightAtCity = (weather) => {
