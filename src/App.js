@@ -23,7 +23,7 @@ const IMAGE_POOLS = {
   midnight:     [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/midnight-paul-lichtblau.jpg', process.env.PUBLIC_URL + '/assets/midnight-tony-dearwester.jpg'],
   night:        [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-gregoire-jeanneau.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-daniel-ramirez.jpg', process.env.PUBLIC_URL + '/assets/night-dusk-grain.png'],
   sunrise:      [process.env.PUBLIC_URL + '/assets/sunrise.jpg', process.env.PUBLIC_URL + '/assets/sunrise-soft-morning.jpg'],
-  sunset:       [process.env.PUBLIC_URL + '/assets/sunset.jpg', process.env.PUBLIC_URL + '/assets/sunset-vivaan-trivedii.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear.jpg'],
+  sunset:       [process.env.PUBLIC_URL + '/assets/sunset.jpg', process.env.PUBLIC_URL + '/assets/sunset-vivaan-trivedii.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear.jpg', process.env.PUBLIC_URL + '/assets/sunset-light-rain.jpg'],
   clear:        [process.env.PUBLIC_URL + '/assets/clear.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg'],
 };
 
