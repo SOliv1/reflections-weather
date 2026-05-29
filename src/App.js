@@ -12,6 +12,7 @@ const IMAGE_POOLS = {
   snow:         [require('./assets/snow.jpg'), require('./assets/snow-aaron-burden-5AiWn2U10cw-unsplash.jpg'), require('./assets/snow-AdobeStock_468560656.jpeg')],
   ice:          [require('./assets/ice.jpg'), require('./assets/ice0.jpg')],
   clouds:       [require('./assets/clouds.jpg'), require('./assets/clouds-carlos-torres-MHNjEBeLTgw-unsplash.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg')],
+  'storm-clouds': [require('./assets/clouds.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg'), require('./assets/thunderstorm.jpg')],
   mist:         [require('./assets/mist.jpg'), require('./assets/mist-cool-antoine-rault-IhWRrZx4-kk-unsplash.jpg')],
   scorching:    [require('./assets/scorching.jpg'), require('./assets/scorching-monir-hossain-FAlMcMtmpEw-unsplash.jpg'), require('./assets/scorching-muhammad-usman-hsrz7xgMENg-unsplash.jpg')],
   hot:          [require('./assets/hot.jpg')],

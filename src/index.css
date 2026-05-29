@@ -29,12 +29,12 @@ body {
 }
 
 /* Cinematic grain overlay — BST 18:00–21:00 only, over all weather conditions.
-   dusk-cinematicGrain.png tiles as a film-grain texture above the background but behind UI. */
+   night-dusk-grain.png tiles as a film-grain texture above the background but behind UI. */
 .app.cinematic-dusk main::after {
   content: '';
   position: fixed;
   inset: 0;
-  background: url('./assets/dusk-cinematicGrain.png') repeat center / auto;
+  background: url('./assets/night-dusk-grain.png') repeat center / auto;
   pointer-events: none;
   z-index: 0;
   opacity: 0.55;
@@ -46,29 +46,11 @@ body {
   z-index: 1;
 }
 
-<<<<<<< HEAD
-/* Night mode overlay — softens rain/mist/thunderstorm/snow at night
-=======
-.app.moderate {
-  background-image: url('./assets/AdobeStock_468560656.jpeg');
-}
-
-.app.moderate-adobestock {
-  background-image: url('./assets/AdobeStock_468560656.jpeg');
-}
-
-.app.moderate-simon {
-  background-image: url('./assets/simon-henrotte-HSGUMuJoTAA-unsplash.jpg');
-}
-
-.app.moderate-wolfgang {
-  background-image: url('./assets/wolfgang-hasselmann-R0oueqRY2RE-unsplash.jpg');
-}
-
-.app.warm {
-  background-image: url('./assets/warm.jpg');
-}
-
+/* Night mode overlay — softens rain/mist/thunderstorm/snow at night */
+.app.night-mode main::before {
+  content: '';
+  position: fixed;
+  inset: 0;
   background: rgba(4, 8, 22, 0.24);
   pointer-events: none;
   z-index: 0;
