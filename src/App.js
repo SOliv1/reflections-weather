@@ -17,7 +17,7 @@ const IMAGE_POOLS = {
   mist:         [process.env.PUBLIC_URL + '/assets/mist.jpg', process.env.PUBLIC_URL + '/assets/mist-cool-antoine.jpg'],
   scorching:    [process.env.PUBLIC_URL + '/assets/scorching.jpg', process.env.PUBLIC_URL + '/assets/scorching3.jpg', process.env.PUBLIC_URL + '/assets/scorching2.jpg'],
   hot:          [process.env.PUBLIC_URL + '/assets/hot.jpg'],
-  warm:         [process.env.PUBLIC_URL + '/assets/warm2.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/warm-joel-holland.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg', process.env.PUBLIC_URL + '/assets/warm3-marek-szturc.jpg'],
+  warm:         [process.env.PUBLIC_URL + '/assets/warm.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/warm-joel-holland.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg', process.env.PUBLIC_URL + '/assets/warm3-marek-szturc.jpg'],
   moderate:     [process.env.PUBLIC_URL + '/assets/moderate-jeremy-bishop.jpg', process.env.PUBLIC_URL + '/assets/moderate-inside-dreamatorium.jpg', process.env.PUBLIC_URL + '/assets/moderate-simon-henrotte.jpg', process.env.PUBLIC_URL + '/assets/moderate-soft-day.jpg', process.env.PUBLIC_URL + '/assets/moderate-calm-evening.jpg'],
   cold:         [process.env.PUBLIC_URL + '/assets/cold.jpg', process.env.PUBLIC_URL + '/assets/cold-pasqualino-capobianco.jpg'],
   midnight:     [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/midnight-paul-lichtblau.jpg', process.env.PUBLIC_URL + '/assets/midnight-tony-dearwester.jpg'],
