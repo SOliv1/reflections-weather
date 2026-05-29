@@ -4,38 +4,39 @@ import './index.js';
 import './index.css';
 
 // Per-weather-class image pools — multiple images rotate every 60s with a 1.8s crossfade.
+// Add new images to public/assets and register them in the relevant pool below.
 const IMAGE_POOLS = {
-  extreme:      [require('./assets/extreme.jpg'), require('./assets/extreme02.jpg'), require('./assets/extreme3.jpg')],
-  thunderstorm: [require('./assets/thunderstorm.jpg'), require('./assets/thunderstorm-navi--IA90Li4PYM-unsplash.jpg')],
-  'heavy-rain': [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
-  rain:         [require('./assets/rain.jpg'), require('./assets/rain-stainless-images-JzCf5Y3XmFU-unsplash.jpg')],
-  snow:         [require('./assets/snow.jpg'), require('./assets/snow-aaron-burden-5AiWn2U10cw-unsplash.jpg'), require('./assets/snow-AdobeStock_468560656.jpeg')],
-  ice:          [require('./assets/ice.jpg'), require('./assets/ice0.jpg')],
-  clouds:       [require('./assets/clouds.jpg'), require('./assets/clouds-carlos-torres-MHNjEBeLTgw-unsplash.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg')],
-  'storm-clouds': [require('./assets/clouds.jpg'), require('./assets/clouds-wolf-zimmermann-6sf5rf8QYFE-unsplash.jpg'), require('./assets/thunderstorm.jpg')],
-  mist:         [require('./assets/mist.jpg'), require('./assets/mist-cool-antoine-rault-IhWRrZx4-kk-unsplash.jpg')],
-  scorching:    [require('./assets/scorching.jpg'), require('./assets/scorching-monir-hossain-FAlMcMtmpEw-unsplash.jpg'), require('./assets/scorching-muhammad-usman-hsrz7xgMENg-unsplash.jpg')],
-  hot:          [require('./assets/hot.jpg')],
-  warm:         [require('./assets/warm.jpg')],
-  moderate:     [require('./assets/moderate-simon-henrotte-HSGUMuJoTAA.jpg'), require('./assets/moderate-jeremy-bishop-EwKXn5CapA4-unsplash.jpg'), require('./assets/moderate-inside-dreamatorium-HpVjCnD3pqs-unsplash.jpg')],
-  cold:         [require('./assets/cold.jpg'), require('./assets/cold-pasqualino-capobianco-YPrpSi9Wbxs-unsplash.jpg')],
-  midnight:     [require('./assets/night.jpg'), require('./assets/midnight-paul-lichtblau-qVotvbsuM_c-unsplash.jpg'), require('./assets/midnight-tony-dearwester-s2HFSEfOilA-unsplash.jpg')],
-  night:        [require('./assets/night.jpg'), require('./assets/night-clouds-gregoire-jeanneau-9sxeKzuCVoE-unsplash.jpg')],
-  sunrise:      [require('./assets/sunrise.jpg'), require('./assets/sunrise0.jpg')],
-  sunset:       [require('./assets/sunset.jpg'), require('./assets/sunset-vivaan-trivedii-BhydQXA-sio-unsplash.jpg')],
-  clear:        [require('./assets/clear.jpg')],
+  extreme:      [process.env.PUBLIC_URL + '/assets/extreme.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/extreme02.jpg', process.env.PUBLIC_URL + '/assets/extreme3.jpg'],
+  thunderstorm: [process.env.PUBLIC_URL + '/assets/thunderstorm.jpg', process.env.PUBLIC_URL + '/assets/thunderstorm-navi--IA90Li4PYM-unsplash.jpg', process.env.PUBLIC_URL + '/assets/clouds-storm-tom-barrett.jpg'],
+  'heavy-rain': [process.env.PUBLIC_URL + '/assets/rain.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy1.jpg', process.env.PUBLIC_URL + '/assets/heavy-rain2.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy3.jpg'],
+  rain:         [process.env.PUBLIC_URL + '/assets/rain.jpg', process.env.PUBLIC_URL + '/assets/rain-light.jpg', process.env.PUBLIC_URL + '/assets/rain3.jpg', process.env.PUBLIC_URL + '/assets/rain2.jpg'],
+  snow:         [process.env.PUBLIC_URL + '/assets/snow.jpg', process.env.PUBLIC_URL + '/assets/snow-aaron-burden.jpg'],
+  ice:          [process.env.PUBLIC_URL + '/assets/ice.jpg', process.env.PUBLIC_URL + '/assets/ice0.jpg'],
+  clouds:       [process.env.PUBLIC_URL + '/assets/clouds.jpg', process.env.PUBLIC_URL + '/assets/clouds-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/clouds-carlos-torres.jpg', process.env.PUBLIC_URL + '/assets/clouds-wolf-zimmermann.jpg'],
+  'storm-clouds': [process.env.PUBLIC_URL + '/assets/clouds-storm-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/clouds-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/thunderstorm.jpg'],
+  mist:         [process.env.PUBLIC_URL + '/assets/mist.jpg', process.env.PUBLIC_URL + '/assets/mist-cool-antoine.jpg'],
+  scorching:    [process.env.PUBLIC_URL + '/assets/scorching.jpg', process.env.PUBLIC_URL + '/assets/scorching3.jpg', process.env.PUBLIC_URL + '/assets/scorching2.jpg'],
+  hot:          [process.env.PUBLIC_URL + '/assets/hot.jpg'],
+  warm:         [process.env.PUBLIC_URL + '/assets/warm2.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/warm-joel-holland.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg', process.env.PUBLIC_URL + '/assets/warm3-marek-szturc.jpg'],
+  moderate:     [process.env.PUBLIC_URL + '/assets/moderate-jeremy-bishop.jpg', process.env.PUBLIC_URL + '/assets/moderate-inside-dreamatorium.jpg', process.env.PUBLIC_URL + '/assets/moderate-simon-henrotte.jpg', process.env.PUBLIC_URL + '/assets/moderate-soft-day.jpg', process.env.PUBLIC_URL + '/assets/moderate-calm-evening.jpg'],
+  cold:         [process.env.PUBLIC_URL + '/assets/cold.jpg', process.env.PUBLIC_URL + '/assets/cold-pasqualino-capobianco.jpg'],
+  midnight:     [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/midnight-paul-lichtblau.jpg', process.env.PUBLIC_URL + '/assets/midnight-tony-dearwester.jpg'],
+  night:        [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-gregoire-jeanneau.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-daniel-ramirez.jpg', process.env.PUBLIC_URL + '/assets/night-dusk-grain.png'],
+  sunrise:      [process.env.PUBLIC_URL + '/assets/sunrise.jpg', process.env.PUBLIC_URL + '/assets/sunrise-soft-morning.jpg'],
+  sunset:       [process.env.PUBLIC_URL + '/assets/sunset.jpg', process.env.PUBLIC_URL + '/assets/sunset-vivaan-trivedii.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear.jpg'],
+  clear:        [process.env.PUBLIC_URL + '/assets/clear.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg'],
 };
 
 // Splash screen slideshow — cycles through weather types while no city is loaded.
 const SPLASH_SEQUENCE = [
-  require('./assets/night.jpg'),
-  require('./assets/sunrise.jpg'),
-  require('./assets/warm.jpg'),
-  require('./assets/clouds.jpg'),
-  require('./assets/rain.jpg'),
-  require('./assets/sunset.jpg'),
-  require('./assets/snow.jpg'),
-  require('./assets/thunderstorm.jpg'),
+  process.env.PUBLIC_URL + '/assets/night.jpg',
+  process.env.PUBLIC_URL + '/assets/sunrise.jpg',
+  process.env.PUBLIC_URL + '/assets/warm.jpg',
+  process.env.PUBLIC_URL + '/assets/clouds.jpg',
+  process.env.PUBLIC_URL + '/assets/rain.jpg',
+  process.env.PUBLIC_URL + '/assets/sunset.jpg',
+  process.env.PUBLIC_URL + '/assets/snow.jpg',
+  process.env.PUBLIC_URL + '/assets/thunderstorm.jpg',
 ];
 
 
@@ -1297,7 +1298,10 @@ function App() {
   })();
 
   return (
-    <div className={`app${weatherClass ? ` ${weatherClass}` : ''}${weatherClass && isNightAtCity(weather) ? ' night-mode' : ''}${isCinematicDusk ? ' cinematic-dusk' : ''}`}>
+    <div
+      className={`app${weatherClass ? ` ${weatherClass}` : ''}${weatherClass && isNightAtCity(weather) ? ' night-mode' : ''}${isCinematicDusk ? ' cinematic-dusk' : ''}`}
+      style={{ '--cinematic-grain': `url(${process.env.PUBLIC_URL}/assets/night-dusk-grain.png)` }}
+    >
       {/* Background crossfade layers — JS sets backgroundImage + opacity per weather class */}
       <div className="bg-layer" style={{ backgroundImage: bgSlots[0] ? `url(${bgSlots[0]})` : 'none', opacity: activeSlot === 0 ? 1 : 0 }} />
       <div className="bg-layer" style={{ backgroundImage: bgSlots[1] ? `url(${bgSlots[1]})` : 'none', opacity: activeSlot === 1 ? 1 : 0 }} />
@@ -1309,7 +1313,7 @@ function App() {
           <img
             ref={splashOrbRef}
             className={`splash-orb${locating ? ' orb-loading' : ''}`}
-            src={require('./assets/midnightGlowOrb.jpg')}
+            src={process.env.PUBLIC_URL + '/assets/midnightGlowOrb.jpg'}
             alt=""
             aria-hidden="true"
           />
@@ -1332,7 +1336,7 @@ function App() {
           <img
             ref={headerOrbRef}
             className={`reflections-orb${locating ? ' orb-loading' : ''}`}
-            src={require('./assets/midnightGlowOrb.jpg')}
+            src={process.env.PUBLIC_URL + '/assets/midnightGlowOrb.jpg'}
             alt=""
             aria-hidden="true"
           />

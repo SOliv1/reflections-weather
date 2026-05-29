@@ -16,7 +16,7 @@ body {
 }
 
 /* Background images are JS-driven — see IMAGE_POOLS in App.js.
-   Add images to src/assets/ and register them in the relevant pool array.
+   Add images to public/assets/ and register them in the relevant pool array.
    The two .bg-layer divs crossfade between images with a 1.8s opacity transition. */
 .bg-layer {
   position: fixed;
@@ -34,7 +34,7 @@ body {
   content: '';
   position: fixed;
   inset: 0;
-  background: url('./assets/night-dusk-grain.png') repeat center / auto;
+  background: var(--cinematic-grain) repeat center / auto;
   pointer-events: none;
   z-index: 0;
   opacity: 0.55;
@@ -1842,7 +1842,7 @@ main {
    APP COVER / SPLASH SCREEN
    ════════════════════════════════════════
    To use your own cover image from your Reflections collection:
-   1. Place the image in src/assets/  (e.g. reflections-cover.jpg)
+   1. Place the image in public/assets/  (e.g. reflections-cover.jpg)
    2. Uncomment the background-image line below and update the filename.
    ════════════════════════════════════════ */
 .app-splash {
