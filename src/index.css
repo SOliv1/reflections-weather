@@ -28,7 +28,7 @@ body {
   pointer-events: none;
 }
 
-/* Cinematic grain overlay — BST 18:00–21:00 only, over all weather conditions.
+/* Cinematic grain overlay — BST 18:00–22:00 only, over all weather conditions.
    night-dusk-grain.png tiles as a film-grain texture above the background but behind UI. */
 .app.cinematic-dusk main::after {
   content: '';

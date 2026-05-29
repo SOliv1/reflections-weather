@@ -21,7 +21,7 @@ const IMAGE_POOLS = {
   moderate:     [process.env.PUBLIC_URL + '/assets/moderate-jeremy-bishop.jpg', process.env.PUBLIC_URL + '/assets/moderate-inside-dreamatorium.jpg', process.env.PUBLIC_URL + '/assets/moderate-simon-henrotte.jpg', process.env.PUBLIC_URL + '/assets/moderate-soft-day.jpg', process.env.PUBLIC_URL + '/assets/moderate-calm-evening.jpg'],
   cold:         [process.env.PUBLIC_URL + '/assets/cold.jpg', process.env.PUBLIC_URL + '/assets/cold-pasqualino-capobianco.jpg'],
   midnight:     [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/midnight-paul-lichtblau.jpg', process.env.PUBLIC_URL + '/assets/midnight-tony-dearwester.jpg'],
-  night:        [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-gregoire-jeanneau.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-daniel-ramirez.jpg', process.env.PUBLIC_URL + '/assets/night-dusk.jpg', process.env.PUBLIC_URL + '/assets/night-dusk1.jpg', process.env.PUBLIC_URL + '/assets/night-dusk-grain.png'],
+  night:        [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-gregoire-jeanneau.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-daniel-ramirez.jpg', process.env.PUBLIC_URL + '/assets/night-dusk.jpg', process.env.PUBLIC_URL + '/assets/night-dusk1.jpg'],
   sunrise:      [process.env.PUBLIC_URL + '/assets/sunrise.jpg', process.env.PUBLIC_URL + '/assets/sunrise-soft-morning.jpg'],
   sunset:       [process.env.PUBLIC_URL + '/assets/sunset.jpg', process.env.PUBLIC_URL + '/assets/sunset-vivaan-trivedii.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear.jpg', process.env.PUBLIC_URL + '/assets/sunset-light-rain.jpg'],
   clear:        [process.env.PUBLIC_URL + '/assets/clear.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg'],
@@ -49,6 +49,26 @@ const api = {
   key: process.env.REACT_APP_API_KEY,
   base: "https://api.openweathermap.org/data/2.5/"
 }
+
+const SOCIAL_DUSK_HOUR = 18.5;
+const SOCIAL_NIGHT_HOUR = 19.5;
+const BST_DUSK_END_HOUR = 22;
+
+const isBritishSummerTime = () => {
+  const londonParts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    timeZoneName: 'short',
+  }).formatToParts(new Date());
+
+  return londonParts.find(part => part.type === 'timeZoneName')?.value === 'BST';
+};
+
+const hasExtendedBstDusk = (weather, localHour) => (
+  weather?.timezone === 3600 &&
+  isBritishSummerTime() &&
+  localHour >= SOCIAL_DUSK_HOUR &&
+  localHour < BST_DUSK_END_HOUR
+);
 
 // OpenWeatherMap returns weather[0].main for condition and weather[0].id for detail.
 // Rain IDs 502-504, 522 = heavy/very heavy/extreme rain.
@@ -86,14 +106,13 @@ const getWeatherClass = (weather) => {
   const goldenWindow = 45 * 60;
   const localSecs = ((localUnix % 86400) + 86400) % 86400;
   const localHour = localSecs / 3600;
-  const SOCIAL_DUSK_HOUR  = 18.5;
-  const SOCIAL_NIGHT_HOUR = 19.5;
-  const astroIsNight = localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow;
-  const isSocialNight = !astroIsNight && localHour >= SOCIAL_NIGHT_HOUR;
+  const extendedBstDusk = hasExtendedBstDusk(weather, localHour);
+  const astroIsNight = !extendedBstDusk && (localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow);
+  const isSocialNight = !astroIsNight && !extendedBstDusk && localHour >= SOCIAL_NIGHT_HOUR;
   const isSocialDusk  = !astroIsNight && !isSocialNight && localHour >= SOCIAL_DUSK_HOUR;
   const isNight   = astroIsNight || isSocialNight;
   const isSunrise = !isNight && localUnix < sunriseLocal + goldenWindow;
-  const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk);
+  const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk || extendedBstDusk);
   const isMidnight = localHour >= 23 || localHour < 3;
 
   // Extreme temps override time-of-day entirely
@@ -122,8 +141,13 @@ const isNightAtCity = (weather) => {
   const sunset     = weather.sys.sunset  + weather.timezone;
   const localSecs  = ((localUnix % 86400) + 86400) % 86400;
   const localHour  = localSecs / 3600;
-  // Social evening: treat 19:30+ as night regardless of astronomical sunset
-  return localUnix < sunrise - 30 * 60 || localUnix > sunset + 30 * 60 || localHour >= 19.5;
+  if (hasExtendedBstDusk(weather, localHour)) return false;
+  // Social evening: treat 19:30+ as night, except UK/BST dusk now lasts until 22:00.
+  return (
+    localUnix < sunrise - 30 * 60 ||
+    localUnix > sunset + 30 * 60 ||
+    (!hasExtendedBstDusk(weather, localHour) && localHour >= SOCIAL_NIGHT_HOUR)
+  );
 };
 
 // Returns time-of-day label + icon based on city's local solar position
@@ -144,9 +168,10 @@ const getTimeOfDay = (weather) => {
   if (local < sunrise + golden)                                    return { label: 'Morning',   icon: '🌅' };
   if (local < noonLocal - 60 * 60)                                 return { label: 'Morning',   icon: '☀️' };
   if (local < noonLocal + 60 * 60)                                 return { label: 'Noon',      icon: '🌞' };
-  // Social thresholds — dusk at 18:30, evening at 19:30, even before astronomical sunset
-  if (localHour >= 19.5 && local < sunset + golden)               return { label: 'Evening',   icon: '🌆' };
-  if (localHour >= 18.5 && local < sunset)                        return { label: 'Dusk',      icon: '🌇' };
+  // Social thresholds — dusk at 18:30, extended to 22:00 during UK/BST evenings.
+  if (hasExtendedBstDusk(weather, localHour))                     return { label: 'Dusk',      icon: '🌇' };
+  if (localHour >= SOCIAL_NIGHT_HOUR && local < sunset + golden)  return { label: 'Evening',   icon: '🌆' };
+  if (localHour >= SOCIAL_DUSK_HOUR && local < sunset)            return { label: 'Dusk',      icon: '🌇' };
   if (local < sunset - golden)                                     return { label: 'Afternoon', icon: '🌤️' };
   if (local < sunset)                                              return { label: 'Dusk',      icon: '🌇' };
   if (local < sunset + golden)                                     return { label: 'Evening',   icon: '🌆' };
@@ -1291,10 +1316,10 @@ function App() {
   }
 
   // Cinematic grain overlay — active only during British Summer Time (BST = UTC+1),
-  // between 18:00 and 21:00 BST, for any weather condition.
+  // between 18:00 and 22:00 BST, for any weather condition.
   const isCinematicDusk = clock.label === 'BST' && (() => {
     const h = parseInt(clock.time.split(':')[0], 10);
-    return h >= 18 && h < 21;
+    return h >= 18 && h < BST_DUSK_END_HOUR;
   })();
 
   return (
