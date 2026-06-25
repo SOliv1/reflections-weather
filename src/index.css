@@ -72,7 +72,10 @@ body {
 
 .app.moderate .search-box .search-bar,
 .app.warm .search-box .search-bar,
-.app.hot .search-box .search-bar {
+.app.hot .search-box .search-bar,
+.app.hot-clouds .search-box .search-bar,
+.app.hot-sunset .search-box .search-bar,
+.app.hot-evening .search-box .search-bar {
   background-color: rgba(255, 255, 255, 0.75);
 }
 
@@ -268,9 +271,12 @@ main {
 .app.moderate .reflections-orb,
 .app.warm .reflections-orb,
 .app.hot .reflections-orb,
+.app.hot-clouds .reflections-orb,
 .app.scorching .reflections-orb,
 .app.sunrise .reflections-orb,
-.app.sunset .reflections-orb {
+.app.sunset .reflections-orb,
+.app.hot-sunset .reflections-orb,
+.app.hot-evening .reflections-orb {
   box-shadow:
     0 0 60px 18px rgba(80, 120, 200, 0.25),
     0 0 28px 8px rgba(80, 120, 200, 0.12);
@@ -307,9 +313,12 @@ main {
 .app.moderate .reflections-orb.orb-loading,
 .app.warm .reflections-orb.orb-loading,
 .app.hot .reflections-orb.orb-loading,
+.app.hot-clouds .reflections-orb.orb-loading,
 .app.scorching .reflections-orb.orb-loading,
 .app.sunrise .reflections-orb.orb-loading,
-.app.sunset .reflections-orb.orb-loading {
+.app.sunset .reflections-orb.orb-loading,
+.app.hot-sunset .reflections-orb.orb-loading,
+.app.hot-evening .reflections-orb.orb-loading {
   animation: orb-shimmer-light 5s ease-in-out infinite, orb-pulse 0.9s ease-in-out infinite;
 }
 
@@ -902,11 +911,14 @@ main {
   border-top-color: rgba(255, 175, 100, 0.55);
 }
 
-.app.sunset .weather-summary-card {
+.app.sunset .weather-summary-card,
+.app.hot-sunset .weather-summary-card,
+.app.hot-evening .weather-summary-card {
   border-top-color: rgba(240, 130, 80, 0.55);
 }
 
 .app.hot .weather-summary-card,
+.app.hot-clouds .weather-summary-card,
 .app.scorching .weather-summary-card,
 .app.warm .weather-summary-card,
 .app.moderate .weather-summary-card {

@@ -16,7 +16,10 @@ const IMAGE_POOLS = {
   'storm-clouds': [process.env.PUBLIC_URL + '/assets/clouds-storm-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/clouds-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/thunderstorm.jpg'],
   mist:         [process.env.PUBLIC_URL + '/assets/mist.jpg', process.env.PUBLIC_URL + '/assets/mist-cool-antoine.jpg'],
   scorching:    [process.env.PUBLIC_URL + '/assets/scorching.jpg', process.env.PUBLIC_URL + '/assets/scorching3.jpg', process.env.PUBLIC_URL + '/assets/scorching2.jpg'],
-  hot:          [process.env.PUBLIC_URL + '/assets/hot.jpg'],
+  hot:          [process.env.PUBLIC_URL + '/assets/hot.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-1.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-2.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-3.jpg'],
+  'hot-clouds': [process.env.PUBLIC_URL + '/assets/hot-clear-cloud-sky-1.jpg'],
+  'hot-sunset': [process.env.PUBLIC_URL + '/assets/hot-sunset-1.jpg', process.env.PUBLIC_URL + '/assets/hot-sunset-2.jpg', process.env.PUBLIC_URL + '/assets/hot-sunset-4.jpg'],
+  'hot-evening': [process.env.PUBLIC_URL + '/assets/hot-sunset-3.jpg', process.env.PUBLIC_URL + '/assets/hot-sunset-2.jpg'],
   warm:         [process.env.PUBLIC_URL + '/assets/warm.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/warm-joel-holland.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg', process.env.PUBLIC_URL + '/assets/warm3-marek-szturc.jpg'],
   moderate:     [process.env.PUBLIC_URL + '/assets/moderate-jeremy-bishop.jpg', process.env.PUBLIC_URL + '/assets/moderate-inside-dreamatorium.jpg', process.env.PUBLIC_URL + '/assets/moderate-simon-henrotte.jpg', process.env.PUBLIC_URL + '/assets/moderate-soft-day.jpg', process.env.PUBLIC_URL + '/assets/moderate-calm-evening.jpg'],
   cold:         [process.env.PUBLIC_URL + '/assets/cold.jpg', process.env.PUBLIC_URL + '/assets/cold-pasqualino-capobianco.jpg'],
@@ -50,25 +53,35 @@ const api = {
   base: "https://api.openweathermap.org/data/2.5/"
 }
 
-const SOCIAL_DUSK_HOUR = 18.5;
-const SOCIAL_NIGHT_HOUR = 19.5;
-const BST_DUSK_END_HOUR = 22;
+// Keep dawn and dusk visually balanced around the city's real sunrise/sunset.
+// Around the UK summer solstice this lets evening linger until roughly 22:30 BST.
+const SOLAR_TRANSITION_WINDOW = 70 * 60;
 
-const isBritishSummerTime = () => {
-  const londonParts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London',
-    timeZoneName: 'short',
-  }).formatToParts(new Date());
+const getSolarPhase = (weather) => {
+  if (!weather?.sys || weather.timezone === undefined) return 'day';
 
-  return londonParts.find(part => part.type === 'timeZoneName')?.value === 'BST';
+  const now = Math.floor(Date.now() / 1000);
+  const sunrise = weather.sys.sunrise;
+  const sunset = weather.sys.sunset;
+  const localUnix = now + weather.timezone;
+  const localSecs = ((localUnix % 86400) + 86400) % 86400;
+  const localHour = localSecs / 3600;
+
+  if (now < sunrise - SOLAR_TRANSITION_WINDOW || now >= sunset + SOLAR_TRANSITION_WINDOW) {
+    return localHour >= 23 || localHour < 3 ? 'midnight' : 'night';
+  }
+  if (now < sunrise + SOLAR_TRANSITION_WINDOW) return 'sunrise';
+  if (now < sunset - SOLAR_TRANSITION_WINDOW) return 'day';
+  if (now < sunset) return 'sunset';
+  return 'evening';
 };
 
-const hasExtendedBstDusk = (weather, localHour) => (
-  weather?.timezone === 3600 &&
-  isBritishSummerTime() &&
-  localHour >= SOCIAL_DUSK_HOUR &&
-  localHour < BST_DUSK_END_HOUR
-);
+const getHotWeatherClass = (weather, phase) => {
+  if (phase === 'midnight' || phase === 'night') return phase;
+  if (phase === 'sunset') return 'hot-sunset';
+  if (phase === 'evening') return 'hot-evening';
+  return weather.weather[0].main === 'Clouds' ? 'hot-clouds' : 'hot';
+};
 
 // OpenWeatherMap returns weather[0].main for condition and weather[0].id for detail.
 // Rain IDs 502-504, 522 = heavy/very heavy/extreme rain.
@@ -78,6 +91,7 @@ const getWeatherClass = (weather) => {
   const condition = weather.weather[0].main;
   const id = weather.weather[0].id;
   const temp = weather.main.temp;
+  const solarPhase = getSolarPhase(weather);
 
   // Condition-specific images always win (rain/storm/snow/mist look the same day or night)
   if (condition === 'Extreme') return 'extreme';
@@ -91,41 +105,25 @@ const getWeatherClass = (weather) => {
     if (temp < 1) return 'ice';
     if (temp <= 5) return 'cold';
     if (temp >= 40) return 'scorching';
-    if (temp > 30) return 'hot';
+    if (temp > 29) return getHotWeatherClass(weather, solarPhase);
     if (temp > 16) return 'warm';
     if (id === 804 || weather.clouds?.all >= 75) return 'storm-clouds';
     return 'clouds';
   }
   if (['Mist', 'Fog', 'Haze', 'Smoke'].includes(condition)) return 'mist';
 
-  // For all other conditions — check local time of day at searched city
-  const now = Math.floor(Date.now() / 1000);
-  const localUnix = now + weather.timezone;
-  const sunriseLocal = weather.sys.sunrise + weather.timezone;
-  const sunsetLocal = weather.sys.sunset + weather.timezone;
-  const goldenWindow = 45 * 60;
-  const localSecs = ((localUnix % 86400) + 86400) % 86400;
-  const localHour = localSecs / 3600;
-  const extendedBstDusk = hasExtendedBstDusk(weather, localHour);
-  const astroIsNight = !extendedBstDusk && (localUnix < sunriseLocal - goldenWindow || localUnix > sunsetLocal + goldenWindow);
-  const isSocialNight = !astroIsNight && !extendedBstDusk && localHour >= SOCIAL_NIGHT_HOUR;
-  const isSocialDusk  = !astroIsNight && !isSocialNight && localHour >= SOCIAL_DUSK_HOUR;
-  const isNight   = astroIsNight || isSocialNight;
-  const isSunrise = !isNight && localUnix < sunriseLocal + goldenWindow;
-  const isSunset  = !isNight && !isSunrise && (localUnix > sunsetLocal - goldenWindow || isSocialDusk || extendedBstDusk);
-  const isMidnight = localHour >= 23 || localHour < 3;
-
   // Extreme temps override time-of-day entirely
   if (temp < 1) return 'ice';
   if (temp >= 40) return 'scorching';
 
-  if (isNight && isMidnight) return 'midnight';
-  if (isNight) return 'night';
-  if (isSunrise) return 'sunrise';
-  if (isSunset) return 'sunset';
+  if (temp > 29) return getHotWeatherClass(weather, solarPhase);
+
+  if (solarPhase === 'midnight') return 'midnight';
+  if (solarPhase === 'night') return 'night';
+  if (solarPhase === 'sunrise') return 'sunrise';
+  if (solarPhase === 'sunset' || solarPhase === 'evening') return 'sunset';
 
   // Daytime temperature-based
-  if (temp > 30) return 'hot';
   if (temp > 16) return 'warm';
   if (temp > 5) return 'moderate';
   return 'cold';
@@ -134,20 +132,8 @@ const getWeatherClass = (weather) => {
 
 // Returns true if it is currently night at the searched city
 const isNightAtCity = (weather) => {
-  if (!weather.sys) return false;
-  const now        = Math.floor(Date.now() / 1000);
-  const localUnix  = now + weather.timezone;
-  const sunrise    = weather.sys.sunrise + weather.timezone;
-  const sunset     = weather.sys.sunset  + weather.timezone;
-  const localSecs  = ((localUnix % 86400) + 86400) % 86400;
-  const localHour  = localSecs / 3600;
-  if (hasExtendedBstDusk(weather, localHour)) return false;
-  // Social evening: treat 19:30+ as night, except UK/BST dusk now lasts until 22:00.
-  return (
-    localUnix < sunrise - 30 * 60 ||
-    localUnix > sunset + 30 * 60 ||
-    (!hasExtendedBstDusk(weather, localHour) && localHour >= SOCIAL_NIGHT_HOUR)
-  );
+  const phase = getSolarPhase(weather);
+  return phase === 'night' || phase === 'midnight';
 };
 
 // Returns time-of-day label + icon based on city's local solar position
@@ -157,21 +143,14 @@ const getTimeOfDay = (weather) => {
   const sunrise    = weather.sys.sunrise + weather.timezone;
   const sunset     = weather.sys.sunset  + weather.timezone;
   const dayLen     = sunset - sunrise;
-  const golden     = 40 * 60; // 40-minute golden-hour window
+  const golden     = SOLAR_TRANSITION_WINDOW;
   const noonLocal  = sunrise + dayLen / 2;
-
-  const localSecs = ((local % 86400) + 86400) % 86400;
-  const localHour  = localSecs / 3600;
 
   if (local < sunrise - golden)                                    return { label: 'Night',     icon: '🌙' };
   if (local < sunrise)                                             return { label: 'Dawn',      icon: '🌄' };
   if (local < sunrise + golden)                                    return { label: 'Morning',   icon: '🌅' };
   if (local < noonLocal - 60 * 60)                                 return { label: 'Morning',   icon: '☀️' };
   if (local < noonLocal + 60 * 60)                                 return { label: 'Noon',      icon: '🌞' };
-  // Social thresholds — dusk at 18:30, extended to 22:00 during UK/BST evenings.
-  if (hasExtendedBstDusk(weather, localHour))                     return { label: 'Dusk',      icon: '🌇' };
-  if (localHour >= SOCIAL_NIGHT_HOUR && local < sunset + golden)  return { label: 'Evening',   icon: '🌆' };
-  if (localHour >= SOCIAL_DUSK_HOUR && local < sunset)            return { label: 'Dusk',      icon: '🌇' };
   if (local < sunset - golden)                                     return { label: 'Afternoon', icon: '🌤️' };
   if (local < sunset)                                              return { label: 'Dusk',      icon: '🌇' };
   if (local < sunset + golden)                                     return { label: 'Evening',   icon: '🌆' };
@@ -1319,7 +1298,7 @@ function App() {
   // between 18:00 and 22:00 BST, for any weather condition.
   const isCinematicDusk = clock.label === 'BST' && (() => {
     const h = parseInt(clock.time.split(':')[0], 10);
-    return h >= 18 && h < BST_DUSK_END_HOUR;
+    return h >= 18 && h < 22;
   })();
 
   return (
