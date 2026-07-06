@@ -6,9 +6,9 @@ import './index.css';
 // Per-weather-class image pools — multiple images rotate every 60s with a 1.8s crossfade.
 // Add new images to public/assets and register them in the relevant pool below.
 const IMAGE_POOLS = {
-  extreme:      [process.env.PUBLIC_URL + '/assets/extreme.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/extreme02.jpg', process.env.PUBLIC_URL + '/assets/extreme3.jpg'],
+  extreme:      [process.env.PUBLIC_URL + '/assets/extreme.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/extreme02.jpg', process.env.PUBLIC_URL + '/assets/extreme3.jpg', process.env.PUBLIC_URL + '/assets/extreme3-sunset.jpg'],
   thunderstorm: [process.env.PUBLIC_URL + '/assets/thunderstorm.jpg', process.env.PUBLIC_URL + '/assets/thunderstorm-navi--IA90Li4PYM-unsplash.jpg', process.env.PUBLIC_URL + '/assets/clouds-storm-tom-barrett.jpg'],
-  'heavy-rain': [process.env.PUBLIC_URL + '/assets/rain.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy1.jpg', process.env.PUBLIC_URL + '/assets/heavy-rain2.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy3.jpg'],
+  'heavy-rain': [process.env.PUBLIC_URL + '/assets/rain.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy1.jpg', process.env.PUBLIC_URL + '/assets/heavy-rain2.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy3.jpg', process.env.PUBLIC_URL + '/assets/rain-heavy-increasingcircles.jpg'],
   rain:         [process.env.PUBLIC_URL + '/assets/rain.jpg', process.env.PUBLIC_URL + '/assets/rain-light.jpg', process.env.PUBLIC_URL + '/assets/rain3.jpg', process.env.PUBLIC_URL + '/assets/rain2.jpg'],
   snow:         [process.env.PUBLIC_URL + '/assets/snow.jpg', process.env.PUBLIC_URL + '/assets/snow-aaron-burden.jpg'],
   ice:          [process.env.PUBLIC_URL + '/assets/ice.jpg', process.env.PUBLIC_URL + '/assets/ice0.jpg'],
@@ -16,17 +16,17 @@ const IMAGE_POOLS = {
   'storm-clouds': [process.env.PUBLIC_URL + '/assets/clouds-storm-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/clouds-tom-barrett.jpg', process.env.PUBLIC_URL + '/assets/thunderstorm.jpg'],
   mist:         [process.env.PUBLIC_URL + '/assets/mist.jpg', process.env.PUBLIC_URL + '/assets/mist-cool-antoine.jpg'],
   scorching:    [process.env.PUBLIC_URL + '/assets/scorching.jpg', process.env.PUBLIC_URL + '/assets/scorching3.jpg', process.env.PUBLIC_URL + '/assets/scorching2.jpg'],
-  hot:          [process.env.PUBLIC_URL + '/assets/hot.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-1.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-2.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-3.jpg'],
-  'hot-clouds': [process.env.PUBLIC_URL + '/assets/hot-clear-cloud-sky-1.jpg'],
+  hot:          [process.env.PUBLIC_URL + '/assets/hot.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-1.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-2.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky-3.jpg', process.env.PUBLIC_URL + '/assets/hot-afternoon.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-sky3.jpg'],
+  'hot-clouds': [process.env.PUBLIC_URL + '/assets/hot-clear-cloud-sky-1.jpg', process.env.PUBLIC_URL + '/assets/hot-clear-cloud-sky4.jpg'],
   'hot-sunset': [process.env.PUBLIC_URL + '/assets/hot-sunset-1.jpg', process.env.PUBLIC_URL + '/assets/hot-sunset-2.jpg', process.env.PUBLIC_URL + '/assets/hot-sunset-4.jpg'],
   'hot-evening': [process.env.PUBLIC_URL + '/assets/hot-sunset-3.jpg', process.env.PUBLIC_URL + '/assets/hot-sunset-2.jpg'],
-  warm:         [process.env.PUBLIC_URL + '/assets/warm.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/warm-joel-holland.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg', process.env.PUBLIC_URL + '/assets/warm3-marek-szturc.jpg'],
-  moderate:     [process.env.PUBLIC_URL + '/assets/moderate-jeremy-bishop.jpg', process.env.PUBLIC_URL + '/assets/moderate-inside-dreamatorium.jpg', process.env.PUBLIC_URL + '/assets/moderate-simon-henrotte.jpg', process.env.PUBLIC_URL + '/assets/moderate-soft-day.jpg', process.env.PUBLIC_URL + '/assets/moderate-calm-evening.jpg'],
+  warm:         [process.env.PUBLIC_URL + '/assets/warm.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/warm-joel-holland.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg', process.env.PUBLIC_URL + '/assets/warm3-marek-szturc.jpg', process.env.PUBLIC_URL + '/assets/warm-night-horner-RmoStarBurst.jpg'],
+  moderate:     [process.env.PUBLIC_URL + '/assets/moderate-jeremy-bishop.jpg', process.env.PUBLIC_URL + '/assets/moderate-inside-dreamatorium.jpg', process.env.PUBLIC_URL + '/assets/moderate-simon-henrotte.jpg', process.env.PUBLIC_URL + '/assets/moderate-soft-day.jpg', process.env.PUBLIC_URL + '/assets/moderate-calm-evening.jpg', process.env.PUBLIC_URL + '/assets/moderate-warm.jpg', process.env.PUBLIC_URL + '/assets/moderate-night-stars-field.jpg'],
   cold:         [process.env.PUBLIC_URL + '/assets/cold.jpg', process.env.PUBLIC_URL + '/assets/cold-pasqualino-capobianco.jpg'],
   midnight:     [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/midnight-paul-lichtblau.jpg', process.env.PUBLIC_URL + '/assets/midnight-tony-dearwester.jpg'],
-  night:        [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-gregoire-jeanneau.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-daniel-ramirez.jpg', process.env.PUBLIC_URL + '/assets/night-dusk.jpg', process.env.PUBLIC_URL + '/assets/night-dusk1.jpg'],
-  sunrise:      [process.env.PUBLIC_URL + '/assets/sunrise.jpg', process.env.PUBLIC_URL + '/assets/sunrise-soft-morning.jpg'],
-  sunset:       [process.env.PUBLIC_URL + '/assets/sunset.jpg', process.env.PUBLIC_URL + '/assets/sunset-vivaan-trivedii.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear.jpg', process.env.PUBLIC_URL + '/assets/sunset-light-rain.jpg'],
+  night:        [process.env.PUBLIC_URL + '/assets/night.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-gregoire-jeanneau.jpg', process.env.PUBLIC_URL + '/assets/night-clouds-daniel-ramirez.jpg', process.env.PUBLIC_URL + '/assets/night-dusk.jpg', process.env.PUBLIC_URL + '/assets/night-dusk1.jpg', process.env.PUBLIC_URL + '/assets/night-tranquil2.jpg'],
+  sunrise:      [process.env.PUBLIC_URL + '/assets/sunrise.jpg', process.env.PUBLIC_URL + '/assets/sunrise-soft-morning.jpg', process.env.PUBLIC_URL + '/assets/sunrise-haze.jpg'],
+  sunset:       [process.env.PUBLIC_URL + '/assets/sunset.jpg', process.env.PUBLIC_URL + '/assets/sunset-vivaan-trivedii.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear.jpg', process.env.PUBLIC_URL + '/assets/sunset-light-rain.jpg', process.env.PUBLIC_URL + '/assets/sunset-clear-sky2.jpg', process.env.PUBLIC_URL + '/assets/sunset2.jpg', process.env.PUBLIC_URL + '/assets/sunset4.jpg'],
   clear:        [process.env.PUBLIC_URL + '/assets/clear.jpg', process.env.PUBLIC_URL + '/assets/warm-clear-sky.jpg', process.env.PUBLIC_URL + '/assets/extreme-clear-day.jpg', process.env.PUBLIC_URL + '/assets/clear-anita-austvwarmika.jpg'],
 };
 
@@ -34,10 +34,12 @@ const IMAGE_POOLS = {
 const SPLASH_SEQUENCE = [
   process.env.PUBLIC_URL + '/assets/night.jpg',
   process.env.PUBLIC_URL + '/assets/sunrise.jpg',
-  process.env.PUBLIC_URL + '/assets/warm.jpg',
+  process.env.PUBLIC_URL + '/assets/moderate-warm.jpg',
   process.env.PUBLIC_URL + '/assets/clouds.jpg',
   process.env.PUBLIC_URL + '/assets/rain.jpg',
   process.env.PUBLIC_URL + '/assets/sunset.jpg',
+  process.env.PUBLIC_URL + '/assets/hot-clear-cloud-sky4.jpg',
+  process.env.PUBLIC_URL + '/assets/cold.jpg',
   process.env.PUBLIC_URL + '/assets/snow.jpg',
   process.env.PUBLIC_URL + '/assets/thunderstorm.jpg',
 ];
