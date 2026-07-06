@@ -266,9 +266,19 @@ const windDirection = (deg) => {
 
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
+// The current-weather endpoint's min/max values cover the observation window,
+// not the whole day. Prefer One Call's daily range when it is available.
+const getTodayTempRange = (weather, oneCall) => {
+  const dailyTemp = oneCall?.daily?.[0]?.temp;
+  return {
+    min: Number.isFinite(dailyTemp?.min) ? dailyTemp.min : weather.main.temp_min,
+    max: Number.isFinite(dailyTemp?.max) ? dailyTemp.max : weather.main.temp_max,
+  };
+};
+
 // Generates 3 atmospheric, brand-voice sentences from live weather + forecast data.
 // No external AI API — pure deterministic narrative built from OWM fields.
-const buildWeatherSummary = (weather, forecast) => {
+const buildWeatherSummary = (weather, forecast, oneCall) => {
   const city = weather.name;
   const temp = Math.round(weather.main.temp);
   const feelsLike = Math.round(weather.main.feels_like);
@@ -332,8 +342,9 @@ const buildWeatherSummary = (weather, forecast) => {
   }
 
   // ── Middle — temperature range + texture ──
-  const todayLow  = Math.round(weather.main.temp_min);
-  const todayHigh = Math.round(weather.main.temp_max);
+  const todayRange = getTodayTempRange(weather, oneCall);
+  const todayLow  = Math.round(todayRange.min);
+  const todayHigh = Math.round(todayRange.max);
   const rangePhrase = `a low of ${todayLow}°C to a high of ${todayHigh}°C`;
   let middle;
   const tempDiff = Math.abs(temp - feelsLike);
@@ -384,8 +395,8 @@ const buildWeatherSummary = (weather, forecast) => {
   return [opening, middle, closing];
 };
 
-function WeatherSummary({ weather, forecast }) {
-  const sentences = buildWeatherSummary(weather, forecast);
+function WeatherSummary({ weather, forecast, oneCall }) {
+  const sentences = buildWeatherSummary(weather, forecast, oneCall);
   return (
     <div className="weather-summary-card">
       <div className="weather-summary-header">
@@ -786,6 +797,7 @@ function App() {
 
   // Derived weather class — used in crossfade effect and JSX className
   const weatherClass = weather.main ? getWeatherClass(weather) : '';
+  const todayTempRange = weather.main ? getTodayTempRange(weather, oneCall) : null;
 
   // Splash crossfade helper — same two-slot pattern as switchToImage
   const switchSplashImage = useCallback((url) => {
@@ -1490,9 +1502,9 @@ function App() {
             <div className="weather">{capitalize(weather.weather[0].description)}</div>
             <div className="feels-like">Feels like {displayTemp(weather.main.feels_like)}{tempUnit}</div>
             <div className="temp-range">
-              <span className="temp-range-label">H:</span> {displayTemp(weather.main.temp_max)}{tempUnit}
+              <span className="temp-range-label">H:</span> {displayTemp(todayTempRange.max)}{tempUnit}
               <span className="temp-range-sep"> &nbsp; </span>
-              <span className="temp-range-label">L:</span> {displayTemp(weather.main.temp_min)}{tempUnit}
+              <span className="temp-range-label">L:</span> {displayTemp(todayTempRange.min)}{tempUnit}
             </div>
           </div>
           <div className="extra-info">
@@ -1525,7 +1537,7 @@ function App() {
               <div className="info-value">{timeBuilder(weather.sys.sunset, weather.timezone)}</div>
             </div>
           </div>
-          <WeatherSummary weather={weather} forecast={forecast} />
+          <WeatherSummary weather={weather} forecast={forecast} oneCall={oneCall} />
           {oneCall && (
             <>
               <HourlyForecast
